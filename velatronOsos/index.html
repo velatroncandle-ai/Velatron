@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Velatron vs Osos — Juego</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body onload="initGame()" onresize="resizeCanvas()">
+
+<!-- INTRODUCCIÓN CINEMATOGRÁFICA -->
+<div id="cinematic-intro">
+  <!-- Estrellas animadas -->
+  <div class="stars" id="stars-container"></div>
+  
+  <!-- Efectos de energía -->
+  <div class="energy-pulse"></div>
+  <div class="energy-pulse"></div>
+  <div class="energy-pulse"></div>
+  
+  <!-- Contenido principal -->
+  <div class="intro-logo" id="intro-logo">VELATRON</div>
+  <div class="intro-subtitle" id="intro-subtitle">DEFENSOR CRIPTO</div>
+  <button class="intro-button" id="start-button" onclick="startGame()">
+    🚀 INICIAR MISIÓN NO DEJES QUE TE ATRAPEN LOS OSOS
+  </button>
+  
+  <!-- Advertencia -->
+  <div class="intro-warning">
+    🎧 Usa auriculares para una experiencia completa<br>
+    📱 Toca la pantalla para mover • Doble toque para disparar • Toca a Velatron para el sable láser
+  </div>
+</div>
+
+<!-- Estrellas de fondo para el juego -->
+<div id="game-stars" class="stars"></div>
+
+<div id="hud">Puntos: 0 · Vidas: 3 </div>
+<button id="change-name-btn" onclick="changeName()" title="Cambiar nombre">👤</button>
+<canvas id="game"></canvas>
+
+<script src="game.js"></script>
+
+</body>
+</html>

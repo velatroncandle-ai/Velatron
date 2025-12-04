@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Velatron · Página en mantenimiento</title>
+  <meta name="description" content="Velatron Arcade - Página en mantenimiento. Volvemos pronto." />
+  <style>
+    :root{
+      --bg:#071428;
+      --panel:#0d2030;
+      --accent:#00e676;
+      --muted:#a9c4d6;
+      --glass: rgba(255,255,255,0.03);
+      --radius:14px;
+      --maxw:980px;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(0,230,118,0.06), transparent),
+                  linear-gradient(180deg,#020617 0%, #071428 60%);
+      color:#e6f7ff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
+
+    .card{
+      width:100%;
+      max-width:var(--maxw);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.6);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:0;
+      align-items:stretch;
+    }
+
+    /* Left content */
+    .left{
+      padding:36px 36px;
+      background:
+        url('fondouu.png') center/cover no-repeat,
+        linear-gradient(90deg, rgba(1,20,40,0.45), rgba(3,10,20,0.25));
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      min-height:360px;
+    }
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .brand img{
+      width:64px;
+      height:64px;
+      object-fit:cover;
+      border-radius:10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .brand .title{
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:0.6px;
+      color:#dffeff;
+    }
+    .brand .subtitle{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    h1{
+      margin:6px 0 0 0;
+      font-size:34px;
+      line-height:1.05;
+    }
+    p.lead{
+      margin:12px 0 0 0;
+      color:var(--muted);
+      font-size:15px;
+      max-width:52ch;
+    }
+
+    .countdown{
+      display:flex;
+      gap:12px;
+      margin-top:22px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .box{
+      background:var(--glass);
+      padding:12px 14px;
+      border-radius:10px;
+      min-width:86px;
+      text-align:center;
+      backdrop-filter: blur(4px);
+    }
+    .box .num{ font-size:20px; font-weight:800;}
+    .box .lbl{ font-size:12px; color:var(--muted); margin-top:6px;}
+
+    .actions{
+      margin-top:22px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      text-decoration:none;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn-primary{
+      background: linear-gradient(90deg, #00e676, #00bfa5);
+      color:#012;
+    }
+    .btn-ghost{
+      background:transparent;
+      border:1px solid rgba(174,230,255,0.08);
+      color:var(--muted);
+    }
+
+    /* Right poster */
+    .right{
+      background: linear-gradient(180deg, rgba(8,18,28,0.6), rgba(2,6,10,0.6));
+      padding:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+    }
+    .poster{
+      width:100%;
+      max-width:360px;
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow:0 12px 28px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+      background:#000;
+    }
+    .poster img{ width:100%; height:auto; display:block; }
+
+    footer{
+      padding:18px 24px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      background:transparent;
+      border-top:1px solid rgba(255,255,255,0.02);
+    }
+
+    @media (max-width:900px){
+      .card{ grid-template-columns: 1fr; }
+      .right{ order:-1; padding:12px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="titulo-mant">
+    <div class="left">
+      <div class="brand" aria-hidden="true">
+        <!-- Cambia velatron.jpg por tu logo real -->
+        <img src="velatron.jpg" alt="Velatron logo">
+        <div>
+          <div class="title">Velatron Arcade</div>
+          <div class="subtitle">Game Premiere · Página en mantenimiento</div>
+        </div>
+      </div>
+
+      <h1 id="titulo-mant">Estamos mejorando la experiencia</h1>
+      <p class="lead">
+        Lo sentimos — estamos haciendo ajustes importantes para traer nuevas funciones y una mejor jugabilidad. Volveremos muy pronto.
+      </p>
+
+      <div class="countdown" aria-live="polite">
+        <div class="box" title="Días">
+          <div class="num" id="days">--</div>
+          <div class="lbl">DÍAS</div>
+        </div>
+        <div class="box" title="Horas">
+          <div class="num" id="hours">--</div>
+          <div class="lbl">HORAS</div>
+        </div>
+        <div class="box" title="Minutos">
+          <div class="num" id="minutes">--</div>
+          <div class="lbl">MIN</div>
+        </div>
+        <div class="box" title="Segundos">
+          <div class="num" id="seconds">--</div>
+          <div class="lbl">SEG</div>
+        </div>
+      </div>
+
+      <div class="actions" role="group" aria-label="Acciones">
+        <a class="btn btn-primary" href="/" title="Ir al inicio">
+          Volver al inicio
+        </a>
+
+        <a class="btn btn-ghost" href="mailto:contacto@velatron.com" title="Contactar">
+          Contacto
+        </a>
+
+        <a class="btn btn-ghost" href="https://youtube.com" target="_blank" rel="noopener noreferrer" title="Ver trailer (se abre en nueva pestaña)">
+          Trailer
+        </a>
+      </div>
+
+      <footer>
+        Made with <span style="color:var(--accent); font-weight:800">green</span> energy · Velatron Arcade<br>
+        © <span id="year">2025</span> Velatron. All rights reserved.
+      </footer>
+    </div>
+
+    <aside class="right" aria-hidden="false">
+      <div class="poster" role="img" aria-label="Poster Velatron vs OSSP">
+        <!-- Cambia el src al nombre real del póster generado -->
+        <img src="poster.png" alt="Velatron vs OSSP - Poster">
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    // ===== CONFIG =====
+    // Cambia la fecha de lanzamiento (YYYY, M-1, D, H, M, S)
+    // Ej: 2025-12-01 20:00 -> new Date(2025, 11, 01, 20, 0, 0)
+    const launchDate = new Date(2025, 11, 1, 20, 0, 0);
+    // ==================
+
+    // Actualiza año en el footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Countdown
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minsEl = document.getElementById('minutes');
+    const secsEl = document.getElementById('seconds');
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function updateCountdown(){
+      const now = new Date();
+      const diff = launchDate - now;
+      if (diff <= 0){
+        daysEl.textContent = '00';
+        hoursEl.textContent = '00';
+        minsEl.textContent = '00';
+        secsEl.textContent = '00';
+        // opcional: redirigir cuando termine
+        // window.location.href = '/';
+        return;
+      }
+      const s = Math.floor(diff/1000);
+      const days = Math.floor(s / 86400);
+      const hours = Math.floor((s % 86400) / 3600);
+      const minutes = Math.floor((s % 3600) / 60);
+      const seconds = s % 60;
+
+      daysEl.textContent = pad(days);
+      hoursEl.textContent = pad(hours);
+      minsEl.textContent = pad(minutes);
+      secsEl.textContent = pad(seconds);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>

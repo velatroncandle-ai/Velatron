@@ -1,0 +1,551 @@
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+  }
+ 
+  body {
+    /* Fondo espacial igual que la intro */
+    background: linear-gradient(135deg, #000000 0%, #0b1220 30%, #071026 70%, #000000 100%);
+    font-family: Inter, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    display: block;
+    /* Canvas con fondo completamente transparente para mostrar el fondo desplazable */
+    background: transparent; 
+  }
+
+  #hud {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'Inter', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    z-index: 10;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #00ffff;
+    color: #00ffff;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 1),
+                 0 0 40px rgba(0, 255, 255, 0.8),
+                 0 0 60px rgba(0, 255, 255, 0.6),
+                 0 2px 10px rgba(0, 0, 0, 1);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+    animation: hudPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes hudPulse {
+    0%, 100% { 
+      border-color: #00ffff;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.6),
+                  inset 0 0 20px rgba(0, 255, 255, 0.1);
+      text-shadow: 0 0 20px rgba(0, 255, 255, 1),
+                   0 0 40px rgba(0, 255, 255, 0.8),
+                   0 0 60px rgba(0, 255, 255, 0.6);
+    }
+    50% { 
+      border-color: #0080ff;
+      box-shadow: 0 0 50px rgba(0, 255, 255, 1),
+                  inset 0 0 30px rgba(0, 255, 255, 0.2);
+      text-shadow: 0 0 30px rgba(0, 255, 255, 1),
+                   0 0 50px rgba(0, 255, 255, 1),
+                   0 0 80px rgba(0, 255, 255, 0.8);
+    }
+  }
+
+  /* Botón de cambiar nombre */
+  #change-name-btn {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #00ffff;
+    border-radius: 50%;
+    color: #00ffff;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  }
+
+  #change-name-btn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+    transform: scale(1.1);
+  }
+
+  /* HUD responsive para móviles */
+  @media (max-width: 768px) {
+    #hud {
+      font-size: 20px;
+      top: 10px;
+      left: 10px;
+      padding: 10px 15px;
+      letter-spacing: 0.1em;
+    }
+    
+    #change-name-btn {
+      width: 45px;
+      height: 45px;
+      font-size: 22px;
+      top: 10px;
+      right: 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #hud {
+      font-size: 18px;
+      top: 8px;
+      left: 8px;
+      padding: 8px 12px;
+      letter-spacing: 0.08em;
+    }
+    
+    #change-name-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      top: 8px;
+      right: 8px;
+    }
+  }
+
+  /* Estrellas de fondo para el juego */
+  #game-stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #game {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Personalización de SweetAlert2 tema Velatron */
+  .swal2-popup {
+    background: linear-gradient(135deg, #0b1220 0%, #071026 50%, #102033 100%) !important;
+    border: 2px solid #00ffff !important;
+    border-radius: 15px !important;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 100, 150, 0.3) !important;
+  }
+
+  .swal2-title {
+    color: #00ffff !important;
+    font-family: 'Inter', Arial, sans-serif !important;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8) !important;
+    font-weight: bold !important;
+  }
+
+  .swal2-html-container {
+    color: #ffffff !important;
+    font-family: 'Inter', Arial, sans-serif !important;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .swal2-confirm {
+    background: linear-gradient(45deg, #00ffff, #0080ff) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    font-size: 18px !important;
+    padding: 15px 30px !important;
+    min-width: 200px !important;
+    min-height: 50px !important;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6) !important;
+    transition: all 0.3s ease !important;
+    margin: 10px !important;
+  }
+
+  .swal2-confirm:hover {
+    background: linear-gradient(45deg, #0080ff, #00ffff) !important;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.8) !important;
+    transform: scale(1.05) !important;
+  }
+
+  .swal2-cancel {
+    background: linear-gradient(45deg, #ff4444, #cc0000) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 18px !important;
+    padding: 15px 30px !important;
+    min-width: 200px !important;
+    min-height: 50px !important;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.6) !important;
+    margin: 10px !important;
+  }
+
+  .swal2-cancel:hover {
+    background: linear-gradient(45deg, #cc0000, #ff4444) !important;
+    box-shadow: 0 0 25px rgba(255, 68, 68, 0.8) !important;
+    transform: scale(1.05) !important;
+  }
+
+  /* Botones más grandes en dispositivos móviles */
+  @media (max-width: 768px) {
+    .swal2-confirm, .swal2-cancel {
+      font-size: 26px !important;
+      padding: 25px 45px !important;
+      min-width: 350px !important;
+      min-height: 80px !important;
+      margin: 20px !important;
+      font-weight: 900 !important;
+      letter-spacing: 1px !important;
+    }
+    
+    .swal2-actions {
+      flex-direction: column !important;
+      gap: 15px !important;
+      margin: 30px 0 !important;
+    }
+
+    /* Título más grande en móvil */
+    .swal2-title {
+      font-size: 36px !important;
+      margin: 30px 0 !important;
+      line-height: 1.2 !important;
+    }
+
+    /* Contenido HTML más grande en móvil */
+    .swal2-html-container {
+      font-size: 22px !important;
+      line-height: 1.7 !important;
+      margin: 25px 0 !important;
+      max-height: 60vh !important;
+      overflow-y: auto !important;
+    }
+
+    /* Popup mucho más grande en móvil */
+    .swal2-popup {
+      width: 96vw !important;
+      max-width: 600px !important;
+      padding: 40px 25px !important;
+      margin: 15px !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+    }
+  }
+
+  /* Botones extra grandes para pantallas muy pequeñas */
+  @media (max-width: 480px) {
+    .swal2-confirm, .swal2-cancel {
+      font-size: 30px !important;
+      padding: 30px 50px !important;
+      min-width: 85vw !important;
+      min-height: 90px !important;
+      margin: 25px 10px !important;
+      letter-spacing: 2px !important;
+      font-weight: 900 !important;
+      border-radius: 20px !important;
+    }
+    
+    .swal2-actions {
+      margin: 40px 0 !important;
+      gap: 20px !important;
+    }
+    
+    .swal2-popup {
+      width: 98vw !important;
+      max-width: 500px !important;
+      padding: 50px 20px !important;
+      margin: 5px !important;
+      max-height: 95vh !important;
+      overflow-y: auto !important;
+      border-radius: 25px !important;
+    }
+
+    /* Título extra grande para pantallas pequeñas */
+    .swal2-title {
+      font-size: 42px !important;
+      margin: 35px 0 !important;
+      line-height: 1.1 !important;
+    }
+
+    /* Contenido HTML extra grande para pantallas pequeñas */
+    .swal2-html-container {
+      font-size: 18px !important;
+      line-height: 1.6 !important;
+      margin: 25px 0 !important;
+      max-height: 55vh !important;
+      overflow-y: auto !important;
+    }
+    
+    /* Tabla de ranking responsive */
+    .swal2-html-container table {
+      font-size: 14px !important;
+    }
+    
+    .swal2-html-container table td {
+      padding: 10px 5px !important;
+    }
+  }
+
+  /* INTRODUCCIÓN CINEMATOGRÁFICA VELATRON */
+  #cinematic-intro {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #000000 0%, #0b1220 30%, #071026 70%, #000000 100%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Inter', Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  .stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: starTwinkle 2s infinite alternate;
+  }
+
+  .star.moving {
+    animation: starMove 3s linear infinite;
+  }
+
+  @keyframes starTwinkle {
+    0% { opacity: 0.3; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.2); }
+  }
+
+  @keyframes starMove {
+    0% { transform: translateX(-10px) translateY(-10px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateX(calc(100vw + 10px)) translateY(calc(100vh + 10px)); opacity: 0; }
+  }
+
+  .intro-logo {
+    font-size: clamp(3rem, 8vw, 8rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    background: linear-gradient(45deg, #00ffff, #0080ff, #00ffff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: logoGlow 3s ease-in-out infinite, logoSlide 1.5s ease-out;
+    text-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  @keyframes logoGlow {
+    0%, 100% { 
+      background-position: 0% 50%;
+      filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.8));
+    }
+    50% { 
+      background-position: 100% 50%;
+      filter: drop-shadow(0 0 40px rgba(0, 255, 255, 1));
+    }
+  }
+
+  @keyframes logoSlide {
+    0% { 
+      transform: translateY(-100px);
+      opacity: 0;
+    }
+    100% { 
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .intro-subtitle {
+    font-size: clamp(1rem, 3vw, 2rem);
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: subtitleFade 2s ease-in 1s forwards;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+
+  @keyframes subtitleFade {
+    0% { 
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .intro-button {
+    background: linear-gradient(45deg, #00ffff, #0080ff);
+    border: none;
+    border-radius: 15px;
+    color: #000;
+    font-weight: 900;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    padding: clamp(15px, 3vw, 25px) clamp(30px, 6vw, 50px);
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: buttonAppear 2s ease-in 2s forwards, buttonPulse 2s ease-in-out 4s infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    min-width: clamp(200px, 40vw, 300px);
+    text-align: center;
+  }
+
+  .intro-button:hover {
+    background: linear-gradient(45deg, #0080ff, #00ffff);
+    box-shadow: 0 0 50px rgba(0, 255, 255, 1);
+    transform: scale(1.05);
+  }
+
+  @keyframes buttonAppear {
+    0% { 
+      opacity: 0;
+      transform: scale(0.8) translateY(50px);
+    }
+    100% { 
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes buttonPulse {
+    0%, 100% { 
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+    }
+    50% { 
+      box-shadow: 0 0 50px rgba(0, 255, 255, 1);
+    }
+  }
+
+  .intro-warning {
+    position: absolute;
+    bottom: clamp(20px, 5vh, 50px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: #cccccc;
+    text-align: center;
+    opacity: 0;
+    animation: warningFade 2s ease-in 3s forwards;
+    padding: 0 20px;
+  }
+
+  @keyframes warningFade {
+    0% { opacity: 0; }
+    100% { opacity: 0.7; }
+  }
+
+  .intro-hidden {
+    display: none !important;
+  }
+
+  /* Efectos especiales para la introducción */
+  .energy-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: energyPulse 4s ease-in-out infinite;
+  }
+
+  .energy-pulse:nth-child(2) {
+    animation-delay: 1s;
+    width: 300px;
+    height: 300px;
+  }
+
+  .energy-pulse:nth-child(3) {
+    animation-delay: 2s;
+    width: 400px;
+    height: 400px;
+  }
+
+  @keyframes energyPulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 1;
+    }
+  }
+
+  /* Responsive para móviles */
+  @media (max-width: 768px) {
+    .intro-logo {
+      margin-bottom: 1.5rem;
+    }
+    
+    .intro-subtitle {
+      margin-bottom: 2rem;
+      padding: 0 20px;
+    }
+    
+    .intro-button {
+      margin: 0 20px;
+    }
+  }
+
+  @media (max-height: 600px) {
+    .intro-logo {
+      font-size: clamp(2rem, 6vw, 4rem);
+      margin-bottom: 1rem;
+    }
+    
+    .intro-subtitle {
+      font-size: clamp(0.9rem, 2.5vw, 1.5rem);
+      margin-bottom: 1.5rem;
+    }
+    
+    .intro-warning {
+      bottom: 10px;
+      font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+    }
+  }
