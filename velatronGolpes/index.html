@@ -1,0 +1,1871 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>📈 Velatron - Crypto Runner</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background-color: #001a00;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    #gameContainer {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    canvas {
+      background-color: #000;
+      display: block;
+      max-width: 100vw;
+      max-height: 100vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .visual-controls {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .control-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.6);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #FFFFFF;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .control-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    }
+
+    .control-btn.left {
+      background: linear-gradient(145deg, rgba(0, 255, 100, 0.4), rgba(0, 255, 100, 0.2));
+      border-color: #00FF64;
+      box-shadow: 0 4px 15px rgba(0, 255, 100, 0.4);
+    }
+
+    .control-btn.center {
+      background: linear-gradient(145deg, rgba(100, 255, 100, 0.4), rgba(100, 255, 100, 0.2));
+      border-color: #64FF64;
+      box-shadow: 0 4px 15px rgba(100, 255, 100, 0.4);
+    }
+
+    .control-btn.right {
+      background: linear-gradient(145deg, rgba(100, 255, 0, 0.4), rgba(100, 255, 0, 0.2));
+      border-color: #64FF00;
+      box-shadow: 0 4px 15px rgba(100, 255, 0, 0.4);
+    }
+
+    .ranking {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      border: 3px solid #00FF00;
+      z-index: 1000;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      display: none;
+      color: white;
+    }
+
+    .ranking h3 {
+      margin-top: 0;
+      color: #00FF00;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+      padding: 6px;
+      background-color: rgba(255, 215, 0, 0.1);
+      border-radius: 5px;
+      font-size: 18px;
+    }
+
+    .close-ranking {
+      background-color: #00FF00;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      #gameContainer {
+        padding: 0;
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+      }
+      
+      canvas {
+        max-width: 100vw;
+        max-height: 100vh;
+        min-height: 100vh;
+      }
+      
+      .visual-controls {
+        bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="visual-controls">
+      <div class="control-btn left" id="leftBtn">1</div>
+      <div class="control-btn center" id="centerBtn">2</div>
+      <div class="control-btn right" id="rightBtn">3</div>
+    </div>
+
+    <div id="rankingDiv" class="ranking">
+      <h3>📈 TOP TRADERS 📈</h3>
+      <div id="rankingList"></div>
+      <button class="close-ranking" onclick="hideRanking()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== RANKING JSONBIN ==========
+    // ⚠️⚠️⚠️ IMPORTANTE: Este es el bin de SHIRO - DEBES CAMBIARLO POR EL TUYO DE VELATRON
+    // Ve a https://jsonbin.io y crea tu propio bin para Velatron
+    // Luego reemplaza binId y masterKey abajo con tus propios valores
+    const JSONBIN_CONFIG = {
+      binId: '691f4dd7ae596e708f65b6c9',  // ⚠️ CAMBIAR ESTO
+      masterKey: '$2a$10$oq9t/fB0f9hjxReAGWB/deEVOa5dT06U1vnBvjCr.45zL1CwUNdNG',  // ⚠️ CAMBIAR ESTO
+      baseUrl: 'https://api.jsonbin.io/v3/b/'
+    };
+
+    let ranking = [];
+
+    async function loadRanking() {
+      try {
+        const response = await fetch(`${JSONBIN_CONFIG.baseUrl}${JSONBIN_CONFIG.binId}/latest`, {
+          method: 'GET',
+          headers: {
+            'X-Master-Key': JSONBIN_CONFIG.masterKey
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          ranking = data.record.scores || [];
+          console.log("🏆 Ranking loaded:", ranking.length);
+        }
+      } catch (error) {
+        console.log("🏆 Error loading ranking:", error);
+        ranking = [];
+      }
+    }
+
+    async function saveRanking() {
+      try {
+        const response = await fetch(`${JSONBIN_CONFIG.baseUrl}${JSONBIN_CONFIG.binId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_CONFIG.masterKey
+          },
+          body: JSON.stringify({
+            scores: ranking
+          })
+        });
+        
+        if (response.ok) {
+          console.log("🏆 Ranking saved");
+        }
+      } catch (error) {
+        console.log("🏆 Error saving:", error);
+      }
+    }
+
+    function addToRanking(playerName, playerScore) {
+      const existingPlayerIndex = ranking.findIndex(entry => entry.name === playerName);
+      
+      if (existingPlayerIndex !== -1) {
+        if (playerScore > ranking[existingPlayerIndex].score) {
+          ranking[existingPlayerIndex].score = playerScore;
+          ranking[existingPlayerIndex].date = new Date().toISOString();
+          console.log(`🏆 ${playerName} improved record: ${playerScore}`);
+        } else {
+          console.log(`🏆 ${playerName} didn't beat previous record`);
+          return;
+        }
+      } else {
+        ranking.push({
+          name: playerName,
+          score: playerScore,
+          date: new Date().toISOString()
+        });
+        console.log(`🏆 ${playerName} added to ranking: ${playerScore}`);
+      }
+      
+      ranking.sort((a, b) => b.score - a.score);
+      ranking = ranking.slice(0, 10);
+      saveRanking();
+    }
+
+    function displayRanking() {
+      const rankingDiv = document.getElementById('rankingDiv');
+      const rankingList = document.getElementById('rankingList');
+      
+      if (ranking.length === 0) {
+        rankingList.innerHTML = '<p style="text-align: center;">No hay puntuaciones aún</p>';
+      } else {
+        rankingList.innerHTML = '';
+        ranking.forEach((entry, index) => {
+          const item = document.createElement('div');
+          item.className = 'ranking-item';
+          
+          const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+          item.innerHTML = `
+            <span>${medal} ${entry.name}</span>
+            <span>${entry.score} pts</span>
+          `;
+          rankingList.appendChild(item);
+        });
+      }
+      
+      rankingDiv.style.display = 'block';
+    }
+    
+    function hideRanking() {
+      document.getElementById('rankingDiv').style.display = 'none';
+    }
+
+    async function handleGameOver() {
+      screenShake = 0;
+      
+      setTimeout(() => {
+        const isNewRecord = score > 0 && (ranking.length < 10 || score > ranking[ranking.length - 1]?.score || 0);
+        
+        if (isNewRecord) {
+          const playerName = prompt("New record! Enter your name:", "Karateka");
+          if (playerName && playerName.trim()) {
+            addToRanking(playerName.trim(), score);
+          }
+        }
+        
+        showRankingButton = true;
+      }, 2000);
+    }
+
+    // ========== VARIABLES DE JUEGO ==========
+    let gameState = "start";
+    let score = 0;
+    let gameOver = false;
+    let gameOverShown = false;
+    let balls = [];
+    let kickEffects = [];
+    let groundEffects = [];
+    let particles = [];
+    let backgroundParticles = []; // ✨ Partículas de fondo animadas
+    let screenShake = 0;
+    let velatronSide = "left";
+    let velatronPose = "idle";
+    let kickTimer = 0;
+    let showRankingButton = false;
+    let combo = 0;
+    let comboTimer = 0;
+    
+    let gameTime = 0;
+    let difficultyLevel = 1;
+    let audioInitialized = false;
+    
+    let lives = 3;
+    let lastBallSpawnTime = 0;
+    let channelLastBallTime = [0, 0, 0];
+    let ballSpeed = 2.7;
+    let totalBalls = 0;
+    let missedBalls = 0;
+    let accuracy = 100;
+
+    // ✅ VARIABLES PARA TIMING CONSISTENTE
+    let lastFrameTime = 0;
+    let gameStartTime = 0;
+
+    const BALL_TYPES = {
+      green: { color: "#00FF88", points: 1, effect: "#00FF88" },
+      golden: { color: "#00FF00", points: 2, effect: "#00FF00" },
+      purple: { color: "#AA44FF", points: 2, effect: "#AA44FF" },
+      cyan: { color: "#00FFFF", points: 2, effect: "#00FFFF" }
+    };
+    
+    const sounds = {
+      kickSound: new Audio(),
+      failSound: new Audio(),
+      positionChange: new Audio(),
+      backgroundMusic: new Audio(),
+      gameOverSound: new Audio()
+    };
+    
+    sounds.kickSound.src = "music/kick_sound.mp3";
+    sounds.kickSound.volume = 0.4;
+    sounds.failSound.src = "music/fail_sound.mp3";
+    sounds.failSound.volume = 0.6;
+    sounds.positionChange.src = "music/position_change.mp3";
+    sounds.positionChange.volume = 0.3;
+    sounds.backgroundMusic.src = "music/musica_fondo.mp3";
+    sounds.backgroundMusic.volume = 0.6;
+    sounds.backgroundMusic.loop = true;
+    sounds.gameOverSound.src = "music/game_over.mp3";
+    sounds.gameOverSound.volume = 0.8;
+    
+    window.startGame = function() {
+      console.log("🚀 START GAME EXECUTED!");
+      
+      gameState = "playing";
+      score = 0;
+      gameOver = false;
+      gameOverShown = false;
+      balls = [];
+      kickEffects = [];
+      groundEffects = [];
+      particles = [];
+      screenShake = 0;
+      velatronSide = "left";
+      velatronPose = "idle";
+      kickTimer = 0;
+      showRankingButton = false;
+      combo = 0;
+      comboTimer = 0;
+      
+      lives = 3;
+      lastBallSpawnTime = 0;
+      channelLastBallTime = [0, 0, 0];
+      ballSpeed = 2.7;
+      totalBalls = 0;
+      missedBalls = 0;
+      accuracy = 100;
+      gameTime = 0;
+      difficultyLevel = 1;
+      
+      // ✅ RESETEAR TIMING
+      gameStartTime = performance.now();
+      lastFrameTime = gameStartTime;
+      
+      hideRanking();
+      
+      setTimeout(() => {
+        if (!audioInitialized) {
+          initializeAudio();
+        }
+        
+        try {
+          if (sounds && sounds.backgroundMusic) {
+            sounds.backgroundMusic.currentTime = 0;
+            const playPromise = sounds.backgroundMusic.play();
+            
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                console.log("🎵 Music started correctly");
+              }).catch(error => {
+                console.log("🎵 Error playing music:", error);
+                setTimeout(() => {
+                  sounds.backgroundMusic.play().catch(() => {});
+                }, 100);
+              });
+            }
+          }
+        } catch (e) {
+          console.log("🎵 Error setting up music:", e);
+        }
+      }, 50);
+    };
+
+    window.restartGame = function() {
+      window.startGame();
+    };
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      const containerWidth = window.innerWidth;
+      const containerHeight = window.innerHeight;
+      const isMobile = window.innerWidth <= 768;
+      
+      if (isMobile) {
+        const gameRatio = 600 / 900;
+        let finalWidth = containerHeight * gameRatio;
+        let finalHeight = containerHeight;
+        
+        if (finalWidth > containerWidth) {
+          finalWidth = containerWidth * 0.98;
+          finalHeight = finalWidth / gameRatio;
+        }
+        
+        const minHeight = containerHeight * 0.98;
+        if (finalHeight < minHeight) {
+          finalHeight = minHeight;
+          finalWidth = finalHeight * gameRatio;
+          if (finalWidth > containerWidth) {
+            finalWidth = containerWidth * 0.98;
+            finalHeight = finalWidth / gameRatio;
+          }
+        }
+        
+        canvas.width = 600;
+        canvas.height = 900;
+        canvas.style.width = `${Math.round(finalWidth)}px`;
+        canvas.style.height = `${Math.round(finalHeight)}px`;
+      } else {
+        let canvasWidth = 600;
+        let canvasHeight = 900;
+        const scale = Math.min(containerWidth / canvasWidth, containerHeight / canvasHeight, 1);
+        canvasWidth *= scale;
+        canvasHeight *= scale;
+        canvas.width = 600;
+        canvas.height = 900;
+        canvas.style.width = `${canvasWidth}px`;
+        canvas.style.height = `${canvasHeight}px`;
+      }
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+
+    let gameStarted = false;
+
+    // ✅ ESCALAS ACTUALIZADAS CON PUNCH
+    const VELATRON_SCALES = {
+      idle: 0.35,
+      kickLeft: 0.40,
+      kickRight: 0.40,
+      punch: 0.35,  // ✅ NUEVA ESCALA PARA PUÑO
+      jump: 0.40,
+      fallen: 0.40
+    };
+
+    const VELATRON_POSITIONS = {
+      left: 200,
+      center: 300,
+      right: 400
+    };
+    const VELATRON_Y_OFFSET = 60;
+    
+    const BALL_SIZE = 60;
+    const KICK_EFFECT_SIZE = 80;
+    const GROUND_EFFECT_SIZE = 120;
+    const KICK_RANGE_TOP = 300;
+    const KICK_RANGE_BOTTOM = 120;
+
+    const MIN_BALL_SPACING = 200;
+    const MIN_CHANNEL_SPACING = 250;
+
+    function createBackupImage(width, height, color) {
+      const backupCanvas = document.createElement('canvas');
+      backupCanvas.width = width;
+      backupCanvas.height = height;
+      const backupCtx = backupCanvas.getContext('2d');
+      backupCtx.fillStyle = color;
+      backupCtx.fillRect(0, 0, width, height);
+      return backupCanvas;
+    }
+
+    // ✅ IMÁGENES ACTUALIZADAS CON VELATRON_PUÑO
+    const images = {
+      background: new Image(),
+      velatronIdle: new Image(),
+      velatronKickLeft: new Image(),
+      velatronKickRight: new Image(),
+      velatronPunch: new Image(),  // ✅ NUEVA IMAGEN PARA PUÑO
+      velatronJump: new Image(),
+      velatronFallen: new Image(),
+      ballGreen: new Image(),
+      ballRed: new Image(),
+      effectGreen: new Image(),
+      effectGround: new Image(),
+      startButton: new Image(),
+      resetButton: new Image()
+    };
+
+    // ✅ IMÁGENES DE RESPALDO ACTUALIZADAS
+    const backupImages = {
+      background: createBackupImage(600, 900, '#1a1a2e'),
+      velatronIdle: createBackupImage(200, 300, '#FFFFFF'),
+      velatronKickLeft: createBackupImage(200, 300, '#FFFFFF'),
+      velatronKickRight: createBackupImage(200, 300, '#FFFFFF'),
+      velatronPunch: createBackupImage(200, 300, '#FFFFFF'),  // ✅ IMAGEN DE RESPALDO PARA PUÑO
+      velatronJump: createBackupImage(200, 300, '#FFFFFF'),
+      velatronFallen: createBackupImage(200, 300, '#FFFFFF'),
+      ballGreen: createBackupImage(60, 60, '#00FF00'),
+      ballRed: createBackupImage(60, 60, '#FF0000'),
+      effectGreen: createBackupImage(80, 80, '#00FF00'),
+      effectGround: createBackupImage(120, 120, '#8B4513'),
+      startButton: createBackupImage(100, 50, '#00FF00'),
+      resetButton: createBackupImage(100, 50, '#FF4444')
+    };
+
+    let imagesLoaded = 0;
+    const totalImages = 13; // ✅ INCREMENTADO DE 12 A 13 IMÁGENES
+
+    function imageLoaded() {
+      imagesLoaded++;
+      console.log(`📸 Image loaded: ${imagesLoaded}/${totalImages}`);
+      if (imagesLoaded === totalImages && !gameStarted) {
+        gameStarted = true;
+        gameState = "start";
+        loadRanking();
+        gameLoop();
+      }
+    }
+
+    function imageError(src) {
+      console.error("❌ Error loading image:", src);
+      imagesLoaded++;
+      if (imagesLoaded === totalImages && !gameStarted) {
+        gameStarted = true;
+        gameState = "start";
+        loadRanking();
+        gameLoop();
+      }
+    }
+
+    // ✅ CARGAR IMÁGENES INCLUYENDO VELATRON_PUÑO
+    images.background.onload = imageLoaded;
+    images.background.onerror = () => imageError("background.png");
+    images.background.src = "img/background.png";
+
+    images.velatronIdle.onload = imageLoaded;
+    images.velatronIdle.onerror = () => imageError("shiro_idle.png");
+    images.velatronIdle.src = "img/shiro_idle.png";
+
+    images.velatronKickLeft.onload = imageLoaded;
+    images.velatronKickLeft.onerror = () => imageError("shiro_kick_left.png");
+    images.velatronKickLeft.src = "img/shiro_kick_left.png";
+
+    images.velatronKickRight.onload = imageLoaded;
+    images.velatronKickRight.onerror = () => imageError("shiro_kick_right.png");
+    images.velatronKickRight.src = "img/shiro_kick_right.png";
+
+    // ✅ NUEVA IMAGEN VELATRON_PUÑO
+    images.velatronPunch.onload = imageLoaded;
+    images.velatronPunch.onerror = () => imageError("shiro_Punch.png");
+    images.velatronPunch.src = "img/shiro_Punch.png";
+
+    images.velatronJump.onload = imageLoaded;
+    images.velatronJump.onerror = () => imageError("shiro_jump.png");
+    images.velatronJump.src = "img/shiro_jump.png";
+
+    images.velatronFallen.onload = imageLoaded;
+    images.velatronFallen.onerror = () => imageError("shiro_fallen.png");
+    images.velatronFallen.src = "img/shiro_fallen.png";
+
+    images.ballGreen.onload = imageLoaded;
+    images.ballGreen.onerror = () => imageError("ball_green.png");
+    images.ballGreen.src = "img/ball_green.png";
+
+    images.ballRed.onload = imageLoaded;
+    images.ballRed.onerror = () => imageError("ball_red.png");
+    images.ballRed.src = "img/ball_red.png";
+
+    images.effectGreen.onload = imageLoaded;
+    images.effectGreen.onerror = () => imageError("1-effect_green.png");
+    images.effectGreen.src = "img/1-effect_green.png";
+
+    images.effectGround.onload = imageLoaded;
+    images.effectGround.onerror = () => imageError("effect_ground.jpg");
+    images.effectGround.src = "img/effect_ground.jpg";
+
+    images.startButton.onload = imageLoaded;
+    images.startButton.onerror = () => imageError("start.png");
+    images.startButton.src = "img/start.png";
+
+    images.resetButton.onload = imageLoaded;
+    images.resetButton.onerror = () => imageError("reset.png");
+    images.resetButton.src = "img/reset.png";
+
+    gameStarted = false;
+    loadRanking();
+    initBackgroundParticles(); // ✨ Inicializar partículas de fondo
+
+    function initializeAudio() {
+      if (audioInitialized) return;
+      try {
+        Object.values(sounds).forEach(sound => {
+          if (sound) {
+            sound.play().then(() => {
+              sound.pause();
+              sound.currentTime = 0;
+            }).catch(() => {});
+          }
+        });
+        audioInitialized = true;
+      } catch (e) {}
+    }
+
+    function playSound(soundName) {
+      try {
+        if (!audioInitialized) initializeAudio();
+        if (sounds[soundName]) {
+          sounds[soundName].currentTime = 0;
+          sounds[soundName].play().catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function createParticles(x, y, color, count = 10) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          size: Math.random() * 4 + 2,
+          color, life: 1,
+          decay: 0.025 + Math.random() * 0.015
+        });
+      }
+    }
+
+    function createExplosion(x, y, color) {
+      for (let i = 0; i < 15; i++) {
+        const angle = (Math.PI * 2 * i) / 15;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * (Math.random() * 6 + 4),
+          vy: Math.sin(angle) * (Math.random() * 6 + 4),
+          size: Math.random() * 6 + 3,
+          color, life: 1, decay: 0.02
+        });
+      }
+    }
+
+    function createGroundImpact(x, y, color) {
+      groundEffects.push({
+        x: x,
+        y: canvas.height - 60,
+        timer: 60,
+        scale: 0.1,
+        color: color,
+        type: 'impact'
+      });
+      
+      for (let i = 0; i < 20; i++) {
+        const angle = (Math.PI * i) / 10 - Math.PI/2;
+        particles.push({
+          x: x,
+          y: canvas.height - 100,
+          vx: Math.cos(angle) * (Math.random() * 8 + 4),
+          vy: Math.sin(angle) * (Math.random() * 8 + 2) - 5,
+          size: Math.random() * 8 + 4,
+          color: color,
+          life: 1,
+          decay: 0.015
+        });
+      }
+      
+      particles.push({
+        x: x,
+        y: canvas.height - 140,
+        vx: 0,
+        vy: -2,
+        size: 40,
+        color: '#FF0000',
+        life: 1,
+        decay: 0.012,
+        text: 'MISS!',
+        type: 'text'
+      });
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const particle = particles[i];
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life -= particle.decay;
+        
+        if (particle.type !== 'text') {
+          particle.size *= 0.98;
+          particle.vy += 0.3;
+        }
+        
+        if (particle.life <= 0 || particle.size <= 0.5) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawParticles() {
+      particles.forEach(particle => {
+        ctx.globalAlpha = particle.life;
+        
+        if (particle.type === 'text') {
+          ctx.fillStyle = particle.color;
+          ctx.font = `bold ${particle.size}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 3;
+          ctx.strokeText(particle.text, particle.x, particle.y);
+          ctx.fillText(particle.text, particle.x, particle.y);
+        } else {
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function addKickEffect(x, y) {
+      kickEffects.push({
+        x: x,
+        y: y,
+        timer: 30,
+        scale: 0.1
+      });
+    }
+
+    function addGroundEffect(x, y) {
+      groundEffects.push({
+        x: x,
+        y: y,
+        timer: 40,
+        scale: 0.1
+      });
+    }
+
+    function updateEffects() {
+      for (let i = kickEffects.length - 1; i >= 0; i--) {
+        const effect = kickEffects[i];
+        effect.timer--;
+        effect.scale += 0.05;
+        if (effect.timer <= 0) kickEffects.splice(i, 1);
+      }
+      
+      for (let i = groundEffects.length - 1; i >= 0; i--) {
+        const effect = groundEffects[i];
+        effect.timer--;
+        
+        if (effect.type === 'impact') {
+          effect.scale += 0.08;
+        } else {
+          effect.scale += 0.03;
+        }
+        
+        if (effect.timer <= 0) groundEffects.splice(i, 1);
+      }
+      
+      if (screenShake > 0 && gameState === "playing") {
+        screenShake = Math.max(0, screenShake - 1);
+      }
+
+      if (comboTimer > 0) {
+        comboTimer--;
+        if (comboTimer === 0) {
+          combo = 0;
+        }
+      }
+    }
+
+    // ✅ FUNCIÓN SPAWNBALL CORREGIDA CON TIMING REAL
+    function spawnBall() {
+      if (gameState !== "playing") return;
+      
+      // ✅ USAR TIEMPO REAL EN LUGAR DE += 16
+      const currentTime = performance.now();
+      gameTime = currentTime - gameStartTime;
+      
+      const newDifficultyLevel = Math.floor(gameTime / 5000) + 1;
+      if (newDifficultyLevel > difficultyLevel) {
+        difficultyLevel = newDifficultyLevel;
+        ballSpeed = 3.5 + (difficultyLevel * 0.3);
+        console.log(`🎯 LEVEL ${difficultyLevel} - Speed: ${ballSpeed.toFixed(2)}`);
+      }
+      
+      const timeSinceLastBall = gameTime - lastBallSpawnTime;
+      const dynamicSpacing = Math.max(200, 800 - (difficultyLevel * 30));
+      if (timeSinceLastBall < dynamicSpacing) {
+        return;
+      }
+      
+      const baseSpawnRate = 0.02 + (difficultyLevel * 0.007);
+      
+      if (Math.random() < baseSpawnRate) {
+        const availableChannels = [];
+        
+        for (let i = 0; i < 3; i++) {
+          const timeSinceChannelBall = gameTime - channelLastBallTime[i];
+          if (timeSinceChannelBall >= MIN_CHANNEL_SPACING) {
+            availableChannels.push(i);
+          }
+        }
+        
+        if (availableChannels.length === 0) return;
+        
+        const channel = availableChannels[Math.floor(Math.random() * availableChannels.length)];
+        
+        const rand = Math.random();
+        let ballType = "green";
+        
+        if (gameTime > 30000 && rand < 0.05) {
+          ballType = "cyan";
+        } else if (gameTime > 20000 && rand < 0.12) {
+          ballType = "golden";
+        } else if (gameTime > 15000 && rand < 0.2) {
+          ballType = "purple";
+        }
+        
+        balls.push({
+          x: channel === 0 ? 150 : (channel === 1 ? 300 : 450),
+          y: -BALL_SIZE,
+          side: channel === 0 ? "left" : (channel === 1 ? "center" : "right"),
+          ballType: ballType,
+          color: BALL_TYPES[ballType].color,
+          points: BALL_TYPES[ballType].points,
+          kicked: false,
+          type: "falling",
+          channel: channel,
+          zigzag: ballType === "purple" ? 0 : undefined
+        });
+        
+        lastBallSpawnTime = gameTime;
+        channelLastBallTime[channel] = gameTime;
+        totalBalls++;
+        
+        console.log(`🎾 Ball ${ballType} (${BALL_TYPES[ballType].points}pts) in channel ${channel}`);
+      }
+    }
+
+    // ✅ FUNCIÓN UPDATEBALLS CORREGIDA CON DELTA TIME
+    function updateBalls(deltaTime) {
+      const speedMultiplier = deltaTime / 16.67; // Normalizar a 60 FPS
+      
+      for (let i = balls.length - 1; i >= 0; i--) {
+        const ball = balls[i];
+        
+        if (!ball.kicked && gameState === "playing") {
+          ball.y += ballSpeed * speedMultiplier;
+          
+          if (ball.ballType === "purple" && ball.zigzag !== undefined) {
+            ball.zigzag += 0.1 * speedMultiplier;
+            const baseX = ball.channel === 0 ? 150 : (ball.channel === 1 ? 300 : 450);
+            ball.x = baseX + Math.sin(ball.zigzag) * 30;
+          }
+          
+          if (ball.y > canvas.height - 120) {
+            if (!gameOverShown) {
+              missedBalls++;
+              lives--;
+              accuracy = totalBalls > 0 ? Math.round(((totalBalls - missedBalls) / totalBalls) * 100) : 100;
+              console.log(`❌ Ball lost! Lives: ${lives}`);
+              
+              createGroundImpact(ball.x, canvas.height - 60, ball.color);
+              playSound('failSound');
+              screenShake = 15;
+              
+              if (lives <= 0) {
+                gameOver = true;
+                gameOverShown = true;
+                gameState = "gameOver";
+                sounds.backgroundMusic.pause();
+                playSound('gameOverSound');
+                screenShake = 8;
+                handleGameOver();
+              }
+            }
+            balls.splice(i, 1);
+            continue;
+          }
+        } else if (ball.kicked) {
+          ball.y -= 6 * speedMultiplier;
+          if (ball.y < -BALL_SIZE) {
+            balls.splice(i, 1);
+            continue;
+          }
+        }
+      }
+    }
+
+    function checkKick() {
+      for (let ball of balls) {
+        if (ball.kicked) continue;
+        
+        if (ball.side === velatronSide && 
+            ball.y > canvas.height - KICK_RANGE_TOP && 
+            ball.y < canvas.height - KICK_RANGE_BOTTOM) {
+          
+          ball.kicked = true;
+          
+          const points = ball.points;
+          score += points;
+          combo++;
+          comboTimer = 120;
+          
+          playSound('kickSound');
+          addKickEffect(ball.x, ball.y);
+          screenShake = 6;
+          
+          if (ball.ballType === "cyan") {
+            createExplosion(ball.x, ball.y, "#00FFFF");
+            screenShake = 12;
+          } else if (ball.ballType === "golden") {
+            createExplosion(ball.x, ball.y, "#00FF00");
+            screenShake = 10;
+          } else if (ball.ballType === "purple") {
+            createExplosion(ball.x, ball.y, "#AA44FF");
+            screenShake = 8;
+          } else {
+            createExplosion(ball.x, ball.y, "#00FF88");
+          }
+          
+          console.log(`✅ Ball ${ball.ballType} hit! +${points} pts (Combo x${combo})`);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // ✨ SISTEMA DE PARTÍCULAS DE FONDO (tipo Matrix/Crypto)
+    // Inicializar partículas de fondo
+    function initBackgroundParticles() {
+      backgroundParticles = []; // Reset
+      for (let i = 0; i < 120; i++) { // ✨ AUMENTADO A 120 PARTÍCULAS
+        backgroundParticles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          speed: Math.random() * 2 + 0.5,
+          size: Math.random() * 3 + 1,
+          opacity: Math.random() * 0.7 + 0.2,
+          type: Math.random() > 0.7 ? 'candle' : 'particle' // ✨ Algunos son velas
+        });
+      }
+    }
+    
+    // ✨ EFECTOS ESPECTACULARES ADICIONALES
+    function drawSpectacularEffects() {
+      const time = Date.now() * 0.001;
+      ctx.save();
+      
+      // 1. CÍRCULOS PULSANTES (sobre el orbe central si existe)
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      for (let i = 0; i < 3; i++) {
+        const radius = 100 + i * 40 + Math.sin(time + i) * 20;
+        ctx.strokeStyle = `rgba(0, 255, 0, ${0.3 - i * 0.08})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      // 2. LÍNEAS DE CONEXIÓN FLOTANTES (estilo blockchain)
+      ctx.strokeStyle = 'rgba(0, 255, 0, 0.15)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        const angle = (Math.PI * 2 * i) / 8 + time * 0.1;
+        const x1 = centerX + Math.cos(angle) * 120;
+        const y1 = centerY + Math.sin(angle) * 120;
+        const x2 = centerX + Math.cos(angle + Math.PI / 4) * 180;
+        const y2 = centerY + Math.sin(angle + Math.PI / 4) * 180;
+        
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        
+        // Pequeños círculos en los puntos
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.4)';
+        ctx.beginPath();
+        ctx.arc(x2, y2, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // 3. DESTELLOS ALEATORIOS
+      if (Math.random() > 0.97) {
+        const flashX = Math.random() * canvas.width;
+        const flashY = Math.random() * canvas.height;
+        const grd = ctx.createRadialGradient(flashX, flashY, 0, flashX, flashY, 30);
+        grd.addColorStop(0, 'rgba(0, 255, 0, 0.6)');
+        grd.addColorStop(1, 'rgba(0, 255, 0, 0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(flashX - 30, flashY - 30, 60, 60);
+      }
+      
+      ctx.restore();
+    }
+    
+    function drawBackgroundParticles() {
+      // Solo dibujar si las partículas están inicializadas
+      if (!backgroundParticles || backgroundParticles.length === 0) return;
+      
+      const time = Date.now();
+      
+      // Actualizar y dibujar partículas
+      ctx.save();
+      for (let i = 0; i < backgroundParticles.length; i++) {
+        const p = backgroundParticles[i];
+        
+        // Mover partícula hacia abajo
+        p.y += p.speed;
+        
+        // Si sale de la pantalla, reiniciar arriba
+        if (p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+          p.type = Math.random() > 0.7 ? 'candle' : 'particle';
+        }
+        
+        if (p.type === 'candle') {
+          // ✨ DIBUJAR VELAS DE TRADING ANIMADAS
+          const candleHeight = 20;
+          const candleWidth = 6;
+          const wickHeight = 8;
+          
+          // Wick (mecha)
+          ctx.strokeStyle = `rgba(0, 255, 0, ${p.opacity * 0.8})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y - wickHeight);
+          ctx.lineTo(p.x, p.y + candleHeight + wickHeight);
+          ctx.stroke();
+          
+          // Cuerpo de vela
+          ctx.fillStyle = `rgba(0, 255, 0, ${p.opacity})`;
+          ctx.fillRect(p.x - candleWidth/2, p.y, candleWidth, candleHeight);
+          
+          // Borde brillante
+          ctx.strokeStyle = `rgba(100, 255, 100, ${p.opacity})`;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(p.x - candleWidth/2, p.y, candleWidth, candleHeight);
+          
+        } else {
+          // ✨ PARTÍCULAS NORMALES CON EFECTO DE CÓDIGO
+          // Partícula verde brillante
+          ctx.fillStyle = `rgba(0, 255, 0, ${p.opacity})`;
+          ctx.fillRect(p.x, p.y, p.size, p.size * 5);
+          
+          // Efecto de estela más largo
+          ctx.fillStyle = `rgba(0, 255, 0, ${p.opacity * 0.3})`;
+          ctx.fillRect(p.x, p.y - 15, p.size, 15);
+          
+          // Ocasionalmente mostrar números/caracteres
+          if (Math.random() > 0.95) {
+            ctx.font = `${p.size * 3}px monospace`;
+            ctx.fillStyle = `rgba(0, 255, 0, ${p.opacity * 0.7})`;
+            const chars = ['0', '1', '$', '#', '@', '%'];
+            ctx.fillText(chars[Math.floor(Math.random() * chars.length)], p.x, p.y);
+          }
+        }
+      }
+      ctx.restore();
+      
+      // ✨ GRID MEJORADO - Más visible y dinámico
+      ctx.save();
+      const gridOpacity = 0.08 + Math.sin(time * 0.001) * 0.02;
+      ctx.strokeStyle = `rgba(0, 255, 0, ${gridOpacity})`;
+      ctx.lineWidth = 1;
+      
+      // Líneas horizontales
+      for (let i = 0; i < canvas.height; i += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+      // Líneas verticales
+      for (let i = 0; i < canvas.width; i += 30) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      
+      // ✨ LÍNEAS ESPECIALES MÁS BRILLANTES (simulando gráficos)
+      ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 3);
+      for (let x = 0; x < canvas.width; x += 20) {
+        const y = canvas.height / 3 + Math.sin(x * 0.02 + time * 0.002) * 20;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+
+    function drawBackground() {
+      // Dibujar tu fondo espectacular
+      if (images.background.complete && images.background.naturalWidth > 0) {
+        ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
+      } else {
+        // Fallback con degradado verde oscuro
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, "#001a00");
+        gradient.addColorStop(0.5, "#002200");
+        gradient.addColorStop(1, "#003300");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Círculo central brillante (simulando el orbe)
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const pulseSize = 80 + Math.sin(Date.now() * 0.003) * 10;
+        
+        const grd = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, pulseSize);
+        grd.addColorStop(0, 'rgba(0, 255, 0, 0.4)');
+        grd.addColorStop(0.5, 'rgba(0, 255, 0, 0.2)');
+        grd.addColorStop(1, 'rgba(0, 255, 0, 0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // ✨ EFECTOS ESPECTACULARES ANIMADOS ENCIMA DEL FONDO
+      drawSpectacularEffects();
+      drawBackgroundParticles();
+    }
+
+    function drawBalls() {
+      for (let ball of balls) {
+        const img = ball.ballType === "green" ? images.ballGreen : images.ballRed;
+        
+        if (img.complete && img.naturalWidth > 0) {
+          const time = Date.now() * 0.01;
+          
+          if (ball.ballType === "golden") {
+            ctx.strokeStyle = "#00FF00";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y + BALL_SIZE/2, BALL_SIZE/2 + 5 + Math.sin(time) * 3, 0, Math.PI * 2);
+            ctx.stroke();
+          } else if (ball.ballType === "purple") {
+            ctx.strokeStyle = "#AA44FF";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y + BALL_SIZE/2, BALL_SIZE/2 + 4 + Math.sin(time) * 2, 0, Math.PI * 2);
+            ctx.stroke();
+          } else if (ball.ballType === "cyan") {
+            ctx.strokeStyle = "#00FFFF";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y + BALL_SIZE/2, BALL_SIZE/2 + 6 + Math.sin(time) * 4, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          
+          ctx.drawImage(img, ball.x - BALL_SIZE/2, ball.y, BALL_SIZE, BALL_SIZE);
+        } else {
+          let ballColor = ball.color;
+          const gradient = ctx.createRadialGradient(ball.x, ball.y + BALL_SIZE/2, 0, ball.x, ball.y + BALL_SIZE/2, BALL_SIZE/2);
+          gradient.addColorStop(0, ballColor);
+          gradient.addColorStop(1, darkenColor(ballColor, 0.4));
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y + BALL_SIZE/2, BALL_SIZE/2, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = lightenColor(ballColor, 0.3);
+          ctx.beginPath();
+          ctx.arc(ball.x - 10, ball.y + BALL_SIZE/2 - 10, BALL_SIZE/4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function darkenColor(color, factor) {
+      const hex = color.replace('#', '');
+      const num = parseInt(hex, 16);
+      const amt = Math.round(2.55 * factor * 100);
+      const R = Math.max(0, (num >> 16) - amt);
+      const G = Math.max(0, ((num & 0x0000FF00) >> 8) - amt);
+      const B = Math.max(0, (num & 0x000000FF) - amt);
+      return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
+
+    function lightenColor(color, factor) {
+      const hex = color.replace('#', '');
+      const num = parseInt(hex, 16);
+      const amt = Math.round(2.55 * factor * 100);
+      const R = Math.min(255, (num >> 16) + amt);
+      const G = Math.min(255, ((num & 0x0000FF00) >> 8) + amt);
+      const B = Math.min(255, (num & 0x000000FF) + amt);
+      return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
+
+    function drawEffects() {
+      for (let effect of kickEffects) {
+        if (images.effectGreen.complete && images.effectGreen.naturalWidth > 0) {
+          const effectSize = KICK_EFFECT_SIZE * effect.scale;
+          const alpha = effect.timer / 30;
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(images.effectGreen, effect.x - effectSize/2, effect.y - effectSize/2, effectSize, effectSize);
+          ctx.globalAlpha = 1.0;
+        } else {
+          const radius = 40 * effect.scale;
+          const alpha = effect.timer / 30;
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = "#00FF00";
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+      }
+      
+      for (let effect of groundEffects) {
+        const alpha = effect.timer / 60;
+        ctx.globalAlpha = alpha;
+        
+        if (effect.type === 'impact') {
+          ctx.strokeStyle = effect.color || '#FF0000';
+          ctx.lineWidth = 3;
+          const radius = 80 * effect.scale;
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
+          ctx.stroke();
+          
+          ctx.strokeStyle = effect.color || '#FF6666';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y, radius * 0.7, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (images.effectGround.complete && images.effectGround.naturalWidth > 0) {
+          const effectSize = GROUND_EFFECT_SIZE * effect.scale;
+          ctx.drawImage(images.effectGround, effect.x - effectSize/2, effect.y - effectSize/2, effectSize, effectSize);
+        } else {
+          const radius = 60 * effect.scale;
+          ctx.fillStyle = "#8B4513";
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    // ✅ FUNCIÓN DRAWSHIRO ACTUALIZADA PARA INCLUIR PUÑO
+    function drawVelatron() {
+      let velatronImg = images.velatronIdle;
+      let velatronScale = VELATRON_SCALES.idle;
+      
+      if (gameState === "gameOver") {
+        if (images.velatronFallen && images.velatronFallen.complete && images.velatronFallen.naturalWidth > 0) {
+          velatronImg = images.velatronFallen;
+          velatronScale = VELATRON_SCALES.fallen;
+        }
+      } else if (velatronPose === "kick" && gameState === "playing") {
+        if (velatronSide === "left") {
+          velatronImg = images.velatronKickLeft;
+          velatronScale = VELATRON_SCALES.kickLeft;
+        } else if (velatronSide === "right") {
+          velatronImg = images.velatronKickRight;
+          velatronScale = VELATRON_SCALES.kickRight;
+        } else if (velatronSide === "center") {
+          // ✅ USAR VELATRON_PUÑO CUANDO ESTÁ EN EL CENTRO
+          velatronImg = images.velatronPunch;
+          velatronScale = VELATRON_SCALES.punch;
+        }
+        
+        if (kickTimer > 0) {
+          kickTimer--;
+        } else {
+          velatronPose = "idle";
+        }
+      }
+
+      const velatronX = VELATRON_POSITIONS[velatronSide];
+      const velatronY = canvas.height - VELATRON_Y_OFFSET;
+
+      if (velatronImg && velatronImg.complete && velatronImg.naturalWidth > 0) {
+        const velatronWidth = velatronImg.width * velatronScale;
+        const velatronHeight = velatronImg.height * velatronScale;
+        ctx.drawImage(velatronImg, velatronX - velatronWidth/2, velatronY - velatronHeight, velatronWidth, velatronHeight);
+      } else {
+        // ✅ IMAGEN DE RESPALDO ACTUALIZADA PARA INCLUIR PUÑO
+        let velatronColor = gameState === "gameOver" ? "#FF6666" : "#FFFFFF";
+        const baseSize = 200;
+        const backupWidth = baseSize * velatronScale * 0.75;
+        const backupHeight = baseSize * velatronScale;
+        
+        if (gameState === "gameOver") {
+          ctx.fillStyle = velatronColor;
+          ctx.fillRect(velatronX - backupWidth/2, velatronY - 40, backupWidth, 40);
+          ctx.fillStyle = "#FFE4B5";
+          ctx.beginPath();
+          ctx.arc(velatronX - backupWidth/3, velatronY - 20, 25, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#FF0000";
+          ctx.font = "bold 24px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("X   X", velatronX - backupWidth/3, velatronY - 10);
+        } else {
+          ctx.fillStyle = velatronColor;
+          ctx.fillRect(velatronX - backupWidth/2, velatronY - backupHeight, backupWidth, backupHeight);
+          ctx.fillStyle = "#FFE4B5";
+          ctx.beginPath();
+          ctx.arc(velatronX, velatronY - backupHeight - 15, backupWidth/6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(velatronX - backupWidth/2, velatronY - backupHeight/4, backupWidth, backupHeight/8);
+          
+          if (velatronPose === "kick") {
+            ctx.fillStyle = "#FFFF00";
+            if (velatronSide === "left") {
+              ctx.fillRect(velatronX - backupWidth, velatronY - backupHeight/2, backupWidth/2, 10);
+            } else if (velatronSide === "right") {
+              ctx.fillRect(velatronX + backupWidth/2, velatronY - backupHeight/2, backupWidth/2, 10);
+            } else if (velatronSide === "center") {
+              // ✅ INDICADOR VISUAL PARA PUÑO (CENTRO)
+              ctx.fillStyle = "#FF0000";
+              ctx.beginPath();
+              ctx.arc(velatronX, velatronY - backupHeight/2, 15, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+      }
+    }
+
+    function drawUI() {
+      if (gameState === "playing") {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(10, 10, 260, 140);
+        
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 32px Arial";
+        ctx.textAlign = "left";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        ctx.strokeText("Points: " + score, 20, 45);
+        ctx.fillText("Points: " + score, 20, 45);
+        
+        ctx.fillStyle = "#FF4444";
+        ctx.font = "bold 26px Arial";
+        ctx.strokeText("❤️ Lives: " + lives, 20, 75);
+        ctx.fillText("❤️ Lives: " + lives, 20, 75);
+        
+        ctx.fillStyle = "#00FF00";
+        ctx.font = "bold 22px Arial";
+        ctx.strokeText(`Level: ${difficultyLevel}`, 20, 105);
+        ctx.fillText(`Level: ${difficultyLevel}`, 20, 105);
+        
+        ctx.fillStyle = "#00FFFF";
+        ctx.font = "bold 18px Arial";
+        ctx.strokeText(`Accuracy: ${accuracy}%`, 20, 130);
+        ctx.fillText(`Accuracy: ${accuracy}%`, 20, 130);
+
+        if (combo >= 2) {
+          ctx.fillStyle = "rgba(255, 215, 0, 0.9)";
+          ctx.fillRect(canvas.width - 180, 20, 170, 50);
+          ctx.fillStyle = "#000000";
+          ctx.font = "bold 24px Arial";
+          ctx.textAlign = "center";
+          ctx.strokeStyle = "#00FF00";
+          ctx.lineWidth = 2;
+          ctx.strokeText(`🔥 COMBO x${combo}!`, canvas.width - 95, 52);
+          ctx.fillText(`🔥 COMBO x${combo}!`, canvas.width - 95, 52);
+        }
+      }
+    }
+
+    // ✨ FUNCIÓN PARA DIBUJAR BOTONES BONITOS
+    function drawBeautifulButton(x, y, width, height, text, color, isHovered = false) {
+      // Sombra del botón
+      ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.fillRect(x + 4, y + 4, width, height);
+      
+      // Gradiente principal del botón
+      const gradient = ctx.createLinearGradient(x, y, x, y + height);
+      if (isHovered) {
+        gradient.addColorStop(0, lightenColor(color, 0.3));
+        gradient.addColorStop(1, color);
+      } else {
+        gradient.addColorStop(0, lightenColor(color, 0.2));
+        gradient.addColorStop(1, darkenColor(color, 0.1));
+      }
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, y, width, height);
+      
+      // Borde brillante
+      ctx.strokeStyle = lightenColor(color, 0.4);
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x + 1, y + 1, width - 2, height - 2);
+      
+      // Borde exterior
+      ctx.strokeStyle = darkenColor(color, 0.3);
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, width, height);
+      
+      // Efecto de brillo en la parte superior
+      const shineGradient = ctx.createLinearGradient(x, y, x, y + height/3);
+      shineGradient.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+      shineGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = shineGradient;
+      ctx.fillRect(x + 2, y + 2, width - 4, height/3);
+      
+      // Texto del botón con sombra
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 24px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(text, x + width/2 + 2, y + height/2 + 10);
+      
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(text, x + width/2, y + height/2 + 8);
+    }
+
+    function drawButtons() {
+      const buttonX = canvas.width / 2;
+      const buttonY = canvas.height / 2;
+      
+      if (gameState === "start") {
+        // 🥋 TÍTULO VELATRON PUNCH - MÁS ARRIBA
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 50px Arial";
+        ctx.textAlign = "center";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        ctx.strokeText("🥊 VELATRON PUNCH 🥊", buttonX, buttonY - 200);
+        ctx.fillText("🥊 VELATRON PUNCH 🥊", buttonX, buttonY - 200);
+        
+        ctx.font = "bold 30px Arial";
+        ctx.lineWidth = 3;
+        ctx.strokeText("With kicks and punches!", buttonX, buttonY - 145);
+        ctx.fillText("With kicks and punches!", buttonX, buttonY - 145);
+        
+        // Objetivo MÁS GRANDE y MÁS SEPARADO
+        ctx.font = "bold 24px Arial";
+        ctx.strokeText("🎯 HIT ALL FALLING BALLS!", buttonX, buttonY - 110);
+        ctx.fillText("🎯 HIT ALL FALLING BALLS!", buttonX, buttonY - 110);
+
+        // Puntuaciones MÁS GRANDES y MÁS SEPARADAS
+        ctx.font = "bold 18px Arial";
+        ctx.strokeText("🟢 Green: 1pt  🟡 Gold: 2pts", buttonX, buttonY - 80);
+        ctx.fillText("🟢 Green: 1pt  🟡 Gold: 2pts", buttonX, buttonY - 80);
+
+        ctx.strokeText("🟣 Purple: 2pts  🔵 Cyan: 2pts", buttonX, buttonY - 50);
+        ctx.fillText("🟣 Purple: 2pts  🔵 Cyan: 2pts", buttonX, buttonY - 50);
+
+        // Controles MÁS GRANDES y MÁS SEPARADOS
+        ctx.font = "bold 19px Arial";
+        ctx.strokeText("📱 1: LEFT KICK, 2: PUNCH, 3: RIGHT KICK", buttonX, buttonY - 10);
+        ctx.fillText("📱 1: LEFT KICK, 2: PUNCH, 3: RIGHT KICK", buttonX, buttonY -10);
+        
+        // ✨ BOTÓN START BONITO - MÁS ABAJO AÚN
+        drawBeautifulButton(buttonX - 80, buttonY + 50, 180, 60, "▶️ PLAY", "#4CAF50");
+        
+      } else if (gameState === "gameOver") {
+        // GAME OVER
+        ctx.fillStyle = "#FF0000";
+        ctx.font = "bold 48px Arial";
+        ctx.textAlign = "center";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 5;
+        ctx.strokeText("GAME OVER", buttonX, buttonY - 120);
+        ctx.fillText("GAME OVER", buttonX, buttonY - 120);
+        
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 28px Arial";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        ctx.strokeText("Score: " + score, buttonX, buttonY - 75);
+        ctx.fillText("Score: " + score, buttonX, buttonY - 75);
+        
+        ctx.font = "bold 22px Arial";
+        ctx.strokeText(`Level reached: ${difficultyLevel}`, buttonX, buttonY - 45);
+        ctx.fillText(`Level reached: ${difficultyLevel}`, buttonX, buttonY - 45);
+        
+        // ✨ BOTÓN REINICIAR BONITO
+        drawBeautifulButton(buttonX - 80, buttonY - 25, 160, 50, "🔄 RESTART", "#FF5722");
+        
+        // ✨ BOTÓN RANKING BONITO - MÁS ANCHO
+        if (showRankingButton) {
+          drawBeautifulButton(buttonX - 110, buttonY + 60, 220, 40, "🏆 VIEW RANKING", "#4CAF50");
+        }
+      }
+    }
+
+    // ✅ FUNCIÓN GAMELOOP CORREGIDA CON DELTA TIME
+    function gameLoop() {
+      if (!gameStarted) return;
+
+      // ✅ CALCULAR DELTA TIME REAL
+      const currentTime = performance.now();
+      const deltaTime = Math.min(currentTime - lastFrameTime, 50); // Máximo 50ms para evitar saltos
+      lastFrameTime = currentTime;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (screenShake > 0 && gameState === "playing") {
+        const shakeX = (Math.random() - 0.5) * screenShake;
+        const shakeY = (Math.random() - 0.5) * screenShake;
+        ctx.translate(shakeX, shakeY);
+      }
+      
+      drawBackground();
+      
+      if (gameState === "playing") {
+        spawnBall();
+        updateBalls(deltaTime); // ✅ PASAR DELTA TIME
+        updateEffects();
+        updateParticles();
+        drawBalls();
+        drawEffects();
+        drawParticles();
+        drawVelatron();
+        drawUI();
+      } else {
+        if (gameState === "gameOver") {
+          drawBalls();
+          drawEffects();
+          drawParticles();
+          drawVelatron();
+        }
+        drawButtons();
+      }
+      
+      if (screenShake > 0 && gameState === "playing") {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    function handleKick() {
+      if (gameState !== "playing") return;
+      velatronPose = "kick";
+      kickTimer = 15;
+      checkKick();
+    }
+
+    // EVENT LISTENERS
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && gameState === "start") {
+        if (!audioInitialized) {
+          initializeAudio();
+        }
+        window.startGame();
+        return;
+      }
+      
+      if (e.key === "r" || e.key === "R") {
+        if (gameState === "gameOver") {
+          window.restartGame();
+        }
+        return;
+      }
+      
+      if (gameState !== "playing") return;
+      
+      if (e.key === "ArrowLeft" || e.key === "1") {
+        if (velatronSide === "left") {
+          handleKick();
+        } else {
+          velatronSide = "left";
+          playSound('positionChange');
+        }
+      } else if (e.key === "ArrowRight" || e.key === "3") {
+        if (velatronSide === "right") {
+          handleKick();
+        } else {
+          velatronSide = "right";
+          playSound('positionChange');
+        }
+      } else if (e.key === "ArrowUp" || e.key === "2") {
+        if (velatronSide === "center") {
+          handleKick();
+        } else {
+          velatronSide = "center";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    // BOTONES TÁCTILES
+    document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (gameState === "playing") {
+        if (velatronSide === "left") {
+          handleKick();
+        } else {
+          velatronSide = "left";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    document.getElementById('centerBtn').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (gameState === "playing") {
+        if (velatronSide === "center") {
+          handleKick();
+        } else {
+          velatronSide = "center";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (gameState === "playing") {
+        if (velatronSide === "right") {
+          handleKick();
+        } else {
+          velatronSide = "right";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    document.getElementById('leftBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (gameState === "playing") {
+        if (velatronSide === "left") {
+          handleKick();
+        } else {
+          velatronSide = "left";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    document.getElementById('centerBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (gameState === "playing") {
+        if (velatronSide === "center") {
+          handleKick();
+        } else {
+          velatronSide = "center";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    document.getElementById('rightBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (gameState === "playing") {
+        if (velatronSide === "right") {
+          handleKick();
+        } else {
+          velatronSide = "right";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    // CANVAS EVENTS - ACTUALIZADOS PARA LOS NUEVOS BOTONES
+    canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (touch.clientX - rect.left) * scaleX;
+      const y = (touch.clientY - rect.top) * scaleY;
+      const buttonX = canvas.width / 2;
+      const buttonY = canvas.height / 2;
+      
+      if (gameState === "start") {
+        // ✨ ÁREA DEL BOTÓN JUGAR
+        if (x > buttonX - 80 && x < buttonX + 80 &&
+            y > buttonY + 20 && y < buttonY + 70) {
+          
+          if (!audioInitialized) {
+            initializeAudio();
+          }
+          window.startGame();
+          return;
+        }
+      } else if (gameState === "gameOver") {
+        // ✨ ÁREA DEL BOTÓN REINICIAR
+        if (x > buttonX - 80 && x < buttonX + 80 &&
+            y > buttonY - 25 && y < buttonY + 25) {
+          window.restartGame();
+          return;
+        }
+        
+        // ✨ ÁREA DEL BOTÓN RANKING - ACTUALIZADA PARA EL NUEVO TAMAÑO
+        if (showRankingButton) {
+          if (x > buttonX - 110 && x < buttonX + 110 &&
+              y > buttonY + 60 && y < buttonY + 100) {
+            displayRanking();
+            return;
+          }
+        }
+      }
+      
+      if (gameState !== "playing") return;
+      
+      if (x < canvas.width / 3) {
+        if (velatronSide === "left") {
+          handleKick();
+        } else {
+          velatronSide = "left";
+          playSound('positionChange');
+        }
+      } else if (x > (canvas.width * 2) / 3) {
+        if (velatronSide === "right") {
+          handleKick();
+        } else {
+          velatronSide = "right";
+          playSound('positionChange');
+        }
+      } else {
+        if (velatronSide === "center") {
+          handleKick();
+        } else {
+          velatronSide = "center";
+          playSound('positionChange');
+        }
+      }
+    });
+
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      const buttonX = canvas.width / 2;
+      const buttonY = canvas.height / 2;
+      
+      if (gameState === "start") {
+        // ✨ ÁREA DEL BOTÓN JUGAR
+        if (x > buttonX - 80 && x < buttonX + 80 &&
+            y > buttonY + 20 && y < buttonY + 70) {
+          
+          if (!audioInitialized) {
+            initializeAudio();
+          }
+          window.startGame();
+        }
+      } else if (gameState === "gameOver") {
+        // ✨ ÁREA DEL BOTÓN REINICIAR
+        if (x > buttonX - 80 && x < buttonX + 80 &&
+            y > buttonY - 25 && y < buttonY + 25) {
+          window.restartGame();
+        }
+        
+        // ✨ ÁREA DEL BOTÓN RANKING - ACTUALIZADA PARA EL NUEVO TAMAÑO
+        if (showRankingButton) {
+          if (x > buttonX - 110 && x < buttonX + 110 &&
+              y > buttonY + 60 && y < buttonY + 100) {
+            displayRanking();
+          }
+        }
+      }
+    });
+
+    // PREVENT ZOOM/SCROLL
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        window.scrollTo(0, 1);
+      }, 0);
+    });
+
+    // INICIALIZACIÓN DE AUDIO AL PRIMER TOQUE/CLIC
+    document.addEventListener('click', function initAudioOnFirstInteraction() {
+      if (!audioInitialized) {
+        initializeAudio();
+        console.log("🎵 Audio initialized by first interaction");
+      }
+      document.removeEventListener('click', initAudioOnFirstInteraction);
+    });
+    
+    document.addEventListener('touchstart', function initAudioOnFirstTouch() {
+      if (!audioInitialized) {
+        initializeAudio();
+        console.log("🎵 Audio initialized by first touch");
+      }
+      document.removeEventListener('touchstart', initAudioOnFirstTouch);
+    });
+
+    gameLoop();
+    
+  </script>
+</body>
+</html>
