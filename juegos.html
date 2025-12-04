@@ -5,6 +5,10 @@
   <meta charset="UTF-8" />
   <title>Velatron Arcade</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+</script>
+
   <style>
     * {
       margin: 0;
@@ -937,7 +941,7 @@
               <span class="meta-pill">🏆 Combo score</span>
             </div>
             <div class="game-button-row">
-              <button class="game-btn" onclick="playClick(); window.location.href='velatronOsos';">
+              <button class="game-btn" onclick="playClick(); window.location.href='';">
                 Stay tuned
               </button>
               <a href="https://t.me/velatron5B" class="game-secondary-link" target="_blank" rel="noopener noreferrer">
