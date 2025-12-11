@@ -140,6 +140,124 @@
       touch-action: pan-y pinch-zoom;
       cursor: pointer;
       object-fit: contain;
+      transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.6s ease;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Contenedor para efecto de página */
+    .reader-container {
+      perspective: 2500px;
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 0;
+      transform-style: preserve-3d;
+    }
+
+    /* Overlay de sombra durante el doblez */
+    .page-shadow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 50%);
+      transition: opacity 0.3s ease;
+      z-index: 2;
+    }
+
+    /* Animación realista de doblez hacia la derecha (siguiente página) */
+    @keyframes pageFlipNext {
+      0% {
+        transform: perspective(2500px) rotateY(0deg) translateZ(0px) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+      15% {
+        transform: perspective(2500px) rotateY(-3deg) translateZ(20px) scale(1.02);
+        opacity: 1;
+        filter: brightness(1.1);
+      }
+      40% {
+        transform: perspective(2500px) rotateY(-85deg) translateZ(100px) translateX(50px) scale(0.95);
+        opacity: 0.7;
+        filter: brightness(0.6);
+      }
+      60% {
+        transform: perspective(2500px) rotateY(-95deg) translateZ(100px) translateX(50px) scale(0.95);
+        opacity: 0.3;
+        filter: brightness(0.4);
+      }
+      80% {
+        transform: perspective(2500px) rotateY(-3deg) translateZ(20px) scale(1.02);
+        opacity: 0.8;
+        filter: brightness(1.1);
+      }
+      100% {
+        transform: perspective(2500px) rotateY(0deg) translateZ(0px) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+    }
+
+    /* Animación realista de doblez hacia la izquierda (página anterior) */
+    @keyframes pageFlipPrev {
+      0% {
+        transform: perspective(2500px) rotateY(0deg) translateZ(0px) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+      15% {
+        transform: perspective(2500px) rotateY(3deg) translateZ(20px) scale(1.02);
+        opacity: 1;
+        filter: brightness(1.1);
+      }
+      40% {
+        transform: perspective(2500px) rotateY(85deg) translateZ(100px) translateX(-50px) scale(0.95);
+        opacity: 0.7;
+        filter: brightness(0.6);
+      }
+      60% {
+        transform: perspective(2500px) rotateY(95deg) translateZ(100px) translateX(-50px) scale(0.95);
+        opacity: 0.3;
+        filter: brightness(0.4);
+      }
+      80% {
+        transform: perspective(2500px) rotateY(3deg) translateZ(20px) scale(1.02);
+        opacity: 0.8;
+        filter: brightness(1.1);
+      }
+      100% {
+        transform: perspective(2500px) rotateY(0deg) translateZ(0px) scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+    }
+
+    /* Clase para animar siguiente página */
+    .reader-img.flip-next {
+      animation: pageFlipNext 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+      transform-origin: left center;
+    }
+
+    /* Clase para animar página anterior */
+    .reader-img.flip-prev {
+      animation: pageFlipPrev 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+      transform-origin: right center;
+    }
+
+    /* Efecto hover sobre la imagen - sutil levantamiento */
+    .reader-img:hover {
+      transform: perspective(2500px) translateZ(10px) scale(1.01);
+      box-shadow: 0 20px 60px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Animación de curl en la esquina */
+    @keyframes cornerCurl {
+      0%, 100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      50% { clip-path: polygon(0 0, 95% 0, 100% 5%, 100% 100%, 0 100%); }
     }
 
     .reader-controls {
@@ -356,6 +474,7 @@
 <body>
   <header>
      <!-- <div class="brand">Cómic Velatron</div> -->
+     <!--  <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
   </header>
 
   <!-- Página principal -->
@@ -370,16 +489,16 @@
     <div class="comic-grid">
       <div class="comic-item" onclick="openComic('temporada1')">
         <img src="comics/temporada1/pagina1.jpg">
-        <div class="comic-title">Nacimiento de un heroe</div>
+        <div class="comic-title">Genesis of a Hero"</div>
       </div>
       <div class="comic-item" onclick="openComic('temporada2')">
-        <img src="https://picsum.photos/300/400?random=2">
-        <div class="comic-title">La guerra comienza</div>
+        <img src="comics/keiner/temporada1/1.avif">
+        <div class="comic-title">Birth of a Hero</div>
       </div>
-      <div class="comic-item" onclick="openComic('temporada3')">
+      <!-- <div class="comic-item" onclick="openComic('temporada3')">
         <img src="https://picsum.photos/300/400?random=3">
-        <div class="comic-title">Camino a casa</div>
-      </div>
+        <div class="comic-title">Birth of a Hero</div>
+      </div>-->
     </div>
   </div>
 
@@ -387,7 +506,9 @@
   <div id="reader" class="page">
     <!--<h2 style="text-align:center;">Lector de Cómic</h2>-->
 
-    <img id="comicPage" class="reader-img" src="https://picsum.photos/800/1200?random=11">
+    <div class="reader-container">
+      <img id="comicPage" class="reader-img" src="https://picsum.photos/800/1200?random=11">
+    </div>
 
     <div class="reader-controls">
       <button onclick="prevPage()">← Prev</button>
@@ -414,10 +535,44 @@
          'comics/temporada1/pagina12.jpg'
       ],
       temporada2: [
-        'comics/temporada2/pagina1.jpg',
-        'comics/temporada2/pagina2.jpg',
-        'comics/temporada2/pagina3.jpg',
-        'comics/temporada2/pagina4.jpg'
+        'comics/keiner/temporada1/2.avif',
+        'comics/keiner/temporada1/3.avif',
+        'comics/keiner/temporada1/4.avif',
+        'comics/keiner/temporada1/5.avif',
+        'comics/keiner/temporada1/6.avif',
+        'comics/keiner/temporada1/7.avif',
+        'comics/keiner/temporada1/8.avif',
+        'comics/keiner/temporada1/9.avif',
+        'comics/keiner/temporada1/10.avif',
+        'comics/keiner/temporada1/11.avif',
+        'comics/keiner/temporada1/12.avif',
+        'comics/keiner/temporada1/13.avif',
+        'comics/keiner/temporada1/14.avif',
+        'comics/keiner/temporada1/15.avif',
+        'comics/keiner/temporada1/16.avif',
+        'comics/keiner/temporada1/17.avif',
+        'comics/keiner/temporada1/18.avif',
+        'comics/keiner/temporada1/19.avif',
+        'comics/keiner/temporada1/20.avif',
+        'comics/keiner/temporada1/21.avif',
+        'comics/keiner/temporada1/22.avif',
+        'comics/keiner/temporada1/23.avif',
+        'comics/keiner/temporada1/24.avif',
+        'comics/keiner/temporada1/25.avif',
+        'comics/keiner/temporada1/26.avif',
+        'comics/keiner/temporada1/27.avif',
+        'comics/keiner/temporada1/28.avif',
+        'comics/keiner/temporada1/29.avif',
+        'comics/keiner/temporada1/30.avif',
+        'comics/keiner/temporada1/31.avif',
+        'comics/keiner/temporada1/32.avif',
+        'comics/keiner/temporada1/33.avif',
+        'comics/keiner/temporada1/34.avif',
+        'comics/keiner/temporada1/35.avif',
+        'comics/keiner/temporada1/36.avif',
+        'comics/keiner/temporada1/37.avif',
+        'comics/keiner/temporada1/38.avif',
+        'comics/keiner/temporada1/39.png'
       ],
       temporada3: [
         'comics/temporada3/pagina1.jpg',
@@ -448,22 +603,40 @@
       document.getElementById(id).classList.add('active');
     }
 
-    function loadPage(index) {
+    function loadPage(index, direction = 'next') {
       if (index >= 0 && index < currentComic.length) {
         pageIndex = index;
-        document.getElementById('comicPage').src = currentComic[index];
+        const img = document.getElementById('comicPage');
+        
+        // Remover clases anteriores
+        img.classList.remove('flip-next', 'flip-prev');
+        
+        // Agregar clase según dirección con pequeño delay para trigger
+        setTimeout(() => {
+          img.classList.add(direction === 'next' ? 'flip-next' : 'flip-prev');
+        }, 10);
+        
+        // Cambiar la imagen en el punto medio de la animación (cuando está de lado)
+        setTimeout(() => {
+          img.src = currentComic[index];
+        }, 500);
+        
+        // Limpiar clase después de la animación completa
+        setTimeout(() => {
+          img.classList.remove('flip-next', 'flip-prev');
+        }, 1000);
       }
     }
 
     function nextPage() { 
       if (pageIndex < currentComic.length - 1) {
-        loadPage(pageIndex + 1);
+        loadPage(pageIndex + 1, 'next');
       }
     }
     
     function prevPage() { 
       if (pageIndex > 0) {
-        loadPage(pageIndex - 1);
+        loadPage(pageIndex - 1, 'prev');
       }
     }
 
