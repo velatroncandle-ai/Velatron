@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Radar de Tokens - Detección de Riesgos</title>
+<style>
+body{margin:0;font-family:Arial;background:#0d0d1a;color:#fff}
+header{background:#1a1a33;padding:20px;text-align:center;font-size:1.4rem;font-weight:bold;border-bottom:2px solid #333}
+.panel{padding:20px}
+select,input{padding:10px;border-radius:6px;border:none;margin-right:10px;font-size:1rem}
+button{padding:10px 16px;border:none;border-radius:6px;background:#6a35ff;color:white;cursor:pointer}
+button:hover{background:#8b59ff}
+#bubbleCanvas{margin-top:40px;width:100%;height:500px;background:#111122;border-radius:12px}
+.info{margin-top:25px;background:#1a1a33;padding:20px;border-radius:10px;line-height:1.5rem;white-space:pre-wrap}
+</style>
+</head>
+<body>
+
+<header>Radar de Tokens - Analizador de Riesgo</header>
+
+<div class="panel">
+  <label>Red:</label>
+  <select id="network">
+    <option value="eth">Ethereum</option>
+    <option value="bsc">BSC</option>
+    <option value="solana">Solana</option>
+    <option value="polygon">Polygon</option>
+  </select>
+
+  <input id="tokenAddress" placeholder="Dirección del token" size="40"/>
+  <button onclick="scanToken()">Analizar Token</button>
+
+  <canvas id="bubbleCanvas"></canvas>
+
+  <div class="info" id="resultInfo">Esperando análisis...</div>
+</div>
+
+<script>
+function drawBubbleMap(){
+  const canvas=document.getElementById("bubbleCanvas");
+  const ctx=canvas.getContext("2d");
+  canvas.width=canvas.clientWidth;
+  canvas.height=canvas.clientHeight;
+  const bubbles=[
+    {r:60,color:"#ff4b4b",name:"Riesgo"},
+    {r:40,color:"#ffaa00",name:"Holders"},
+    {r:50,color:"#6a35ff",name:"Liquidez"},
+    {r:35,color:"#00d4ff",name:"Tx"},
+  ];
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  bubbles.forEach((b,i)=>{
+    const x=150+i*180;
+    const y=canvas.height/2;
+    ctx.beginPath();ctx.arc(x,y,b.r,0,Math.PI*2);ctx.fillStyle=b.color;ctx.fill();
+    ctx.fillStyle="white";ctx.textAlign="center";ctx.fillText(b.name,x,y+5);
+  });
+}
+drawBubbleMap();
+
+async function scanToken(){
+  const net=document.getElementById("network").value;
+  const address=document.getElementById("tokenAddress").value.trim();
+  const info=document.getElementById("resultInfo");
+
+  if(!address){ alert("Ingresa una dirección"); return; }
+  info.textContent="Consultando backend...";
+
+  try{
+    let url;
+    if(net==="solana"){
+      url=`http://localhost:5000/api/solana?address=${address}`;
+    }else{
+      url=`http://localhost:5000/api/dex?address=${address}`;
+    }
+
+    const r=await fetch(url);
+    const data=await r.json();
+
+    info.textContent=JSON.stringify(data,null,2);
+  }catch(e){
+    info.textContent="Error conectando con el backend";
+  }
+}
+</script>
+
+</body>
+</html>

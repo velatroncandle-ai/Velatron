@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CómicFlix Pro</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #0a1520, #162838);
+      font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 20px;
+      background: linear-gradient(to bottom, rgba(10,21,32,0.95), rgba(10,21,32,0));
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ff88;
+      text-shadow: 0 0 20px rgba(0,255,136,0.5);
+      letter-spacing: 2px;
+    }
+
+    .page {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      padding-top: 90px;
+      min-height: 100vh;
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .comic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .comic-item {
+      background: linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      border: 2px solid rgba(0,255,136,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .comic-item:hover { 
+      transform: scale(1.05);
+      border-color: rgba(0,255,136,0.6);
+      box-shadow: 0 0 25px rgba(0,255,136,0.3);
+    }
+    .comic-item:active { transform: scale(0.98); }
+
+    .comic-item img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+    }
+
+    .comic-title {
+      padding: 12px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #00ff88;
+      background: rgba(0,0,0,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    /* Reader */
+    #reader {
+      padding-top: 80px;
+    }
+
+    .reader-img {
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border-radius: 10px;
+      touch-action: pan-y pinch-zoom;
+      cursor: pointer;
+      object-fit: contain;
+    }
+
+    .reader-controls {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      padding: 20px;
+      background: linear-gradient(to bottom, #0a1520 0%, #0f1f2f 100%);
+      z-index: 999;
+      box-shadow: 0 2px 15px rgba(0,255,136,0.2);
+      border-bottom: 1px solid rgba(0,255,136,0.2);
+    }
+
+    button {
+      background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%);
+      border: 2px solid #00ff88;
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: #00ff88;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      font-weight: 600;
+      touch-action: manipulation;
+      margin: 0 5px;
+      text-shadow: 0 0 10px rgba(0,255,136,0.5);
+      box-shadow: 0 0 15px rgba(0,255,136,0.2);
+    }
+
+    button:hover { 
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: #0a1520;
+      border-color: #00ff88;
+      box-shadow: 0 0 25px rgba(0,255,136,0.5);
+      text-shadow: none;
+    }
+    button:active { 
+      transform: scale(0.97);
+      box-shadow: 0 0 10px rgba(0,255,136,0.3);
+    }
+
+    /* Optimización móvil */
+    @media (max-width: 768px) {
+      .comic-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+        padding: 15px;
+      }
+
+      .comic-item img {
+        height: 200px;
+      }
+
+      .reader-img {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 0;
+        margin: 0;
+      }
+
+      .reader-controls {
+        gap: 0;
+        padding: 12px 8px;
+      }
+
+      button {
+        padding: 10px 16px;
+        font-size: 13px;
+        margin: 0 2px;
+      }
+
+      h2 {
+        font-size: 18px;
+        padding-left: 15px !important;
+      }
+
+      .page {
+        padding-top: 65px;
+      }
+
+      #reader {
+        padding-top: 65px;
+      }
+
+      header {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .comic-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .comic-item {
+        border-radius: 8px;
+      }
+
+      .comic-item img {
+        height: 180px;
+      }
+
+      .comic-title {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      button {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin: 0 1px;
+      }
+
+      .brand {
+        font-size: 20px;
+      }
+
+      #reader {
+        padding-top: 60px;
+      }
+
+      .page {
+        padding-top: 60px;
+      }
+
+      .reader-controls {
+        padding: 10px 5px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      button {
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+
+      .comic-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .comic-title {
+        font-size: 13px;
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+     <!-- <div class="brand">Cómic Velatron</div> -->
+  </header>
+
+  <!-- Página principal -->
+  <div id="home" class="page active">
+    <h2 style="padding-left:20px; color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.4); font-size: 28px; letter-spacing: 1px;">VELATRON COMICS</h2>
+    <div class="comic-grid">
+      <div class="comic-item" onclick="openComic('temporada1')">
+        <img src="comics/temporada1/pagina1.jpg">
+        <div class="comic-title">La guerra comienza</div>
+      </div>
+      <div class="comic-item" onclick="openComic('temporada2')">
+        <img src="https://picsum.photos/300/400?random=2">
+        <div class="comic-title">Temporada 2</div>
+      </div>
+      <div class="comic-item" onclick="openComic('temporada3')">
+        <img src="https://picsum.photos/300/400?random=3">
+        <div class="comic-title">Temporada 3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página del lector -->
+  <div id="reader" class="page">
+    <!--<h2 style="text-align:center;">Lector de Cómic</h2>-->
+
+    <img id="comicPage" class="reader-img" src="https://picsum.photos/800/1200?random=11">
+
+    <div class="reader-controls">
+      <button onclick="prevPage()">← Prev</button>
+      <button onclick="goHome()">Inicio</button>
+      <button onclick="nextPage()">Next →</button>
+    </div>
+  </div>
+
+  <script>
+    // Lista de temporadas con sus imágenes
+    const comics = {
+      temporada1: [
+        'comics/temporada1/pagina1.jpg',
+        'comics/temporada1/pagina2.jpg',
+        'comics/temporada1/pagina3.jpg',
+        'comics/temporada1/pagina4.jpg',
+        'comics/temporada1/pagina5.jpg',
+        'comics/temporada1/pagina6.jpg',
+          'comics/temporada1/pagina7.jpg',
+        'comics/temporada1/pagina8.jpg',
+        'comics/temporada1/pagina9.jpg',
+        'comics/temporada1/pagina10.jpg',
+        'comics/temporada1/pagina11.jpg',
+         'comics/temporada1/pagina12.jpg'
+      ],
+      temporada2: [
+        'comics/temporada2/pagina1.jpg',
+        'comics/temporada2/pagina2.jpg',
+        'comics/temporada2/pagina3.jpg',
+        'comics/temporada2/pagina4.jpg'
+      ],
+      temporada3: [
+        'comics/temporada3/pagina1.jpg',
+        'comics/temporada3/pagina2.jpg',
+        'comics/temporada3/pagina3.jpg'
+      ]
+    };
+
+    let currentComic = [];
+    let pageIndex = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const swipeThreshold = 50; // píxeles mínimos para detectar swipe
+
+    function openComic(temporada = 'temporada1') {
+      currentComic = comics[temporada] || comics.temporada1;
+      switchPage('reader');
+      loadPage(0);
+      initTouchControls();
+    }
+
+    function goHome() {
+      switchPage('home');
+    }
+
+    function switchPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function loadPage(index) {
+      if (index >= 0 && index < currentComic.length) {
+        pageIndex = index;
+        document.getElementById('comicPage').src = currentComic[index];
+      }
+    }
+
+    function nextPage() { 
+      if (pageIndex < currentComic.length - 1) {
+        loadPage(pageIndex + 1);
+      }
+    }
+    
+    function prevPage() { 
+      if (pageIndex > 0) {
+        loadPage(pageIndex - 1);
+      }
+    }
+
+    // Control táctil por deslizamiento y clic
+    function initTouchControls() {
+      const comicImg = document.getElementById('comicPage');
+      
+      comicImg.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      comicImg.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      // Clic/tap para avanzar
+      comicImg.addEventListener('click', () => {
+        nextPage();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      
+      // Deslizar hacia la izquierda (siguiente página)
+      if (swipeDistance < -swipeThreshold) {
+        nextPage();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
+      // Deslizar hacia la derecha (página anterior)
+      if (swipeDistance > swipeThreshold) {
+        prevPage();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Inicializar en carga de página si ya estamos en el lector
+    window.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('reader').classList.contains('active')) {
+        initTouchControls();
+      }
+    });
+  </script>
+</body>
+</html>
