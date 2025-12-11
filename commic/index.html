@@ -86,6 +86,45 @@
       letter-spacing: 0.5px;
     }
 
+    .search-container {
+      max-width: 600px;
+      margin: 0 20px 30px 20px;
+      padding: 0;
+      position: relative;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 14px 50px 14px 20px;
+      background: linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%);
+      border: 2px solid rgba(0,255,136,0.3);
+      border-radius: 25px;
+      color: #e0e0e0;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .search-box:focus {
+      border-color: #00ff88;
+      box-shadow: 0 0 20px rgba(0,255,136,0.3);
+    }
+
+    .search-box::placeholder {
+      color: rgba(224,224,224,0.5);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 35px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #00ff88;
+      font-size: 20px;
+      pointer-events: none;
+    }
+
     /* Reader */
     #reader {
       padding-top: 80px;
@@ -194,6 +233,21 @@
       header {
         padding: 15px;
       }
+
+      .search-container {
+        margin: 0 15px 20px 15px;
+        padding: 0;
+      }
+
+      .search-box {
+        padding: 12px 45px 12px 15px;
+        font-size: 14px;
+      }
+
+      .search-icon {
+        right: 25px;
+        font-size: 18px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -237,6 +291,27 @@
       .reader-controls {
         padding: 10px 5px;
       }
+
+      .search-container {
+        margin: 0 12px 15px 12px;
+        padding: 0;
+      }
+
+      .search-box {
+        padding: 10px 40px 10px 12px;
+        font-size: 13px;
+        border-radius: 20px;
+      }
+
+      .search-icon {
+        right: 22px;
+        font-size: 16px;
+      }
+
+      h2 {
+        font-size: 20px !important;
+        padding-left: 12px !important;
+      }
     }
 
     @media (max-width: 360px) {
@@ -255,6 +330,26 @@
         font-size: 13px;
         padding: 6px;
       }
+
+      .search-container {
+        margin: 0 10px 12px 10px;
+        padding: 0;
+      }
+
+      .search-box {
+        padding: 9px 38px 9px 10px;
+        font-size: 12px;
+      }
+
+      .search-icon {
+        right: 20px;
+        font-size: 15px;
+      }
+
+      h2 {
+        font-size: 18px !important;
+        padding-left: 10px !important;
+      }
     }
   </style>
 </head>
@@ -266,18 +361,24 @@
   <!-- Página principal -->
   <div id="home" class="page active">
     <h2 style="padding-left:20px; color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.4); font-size: 28px; letter-spacing: 1px;">VELATRON COMICS</h2>
+    
+    <div class="search-container">
+      <input type="text" class="search-box" id="searchInput" placeholder="Buscar cómic por título..." onkeyup="filterComics()">
+      <span class="search-icon">🔍</span>
+    </div>
+
     <div class="comic-grid">
       <div class="comic-item" onclick="openComic('temporada1')">
         <img src="comics/temporada1/pagina1.jpg">
-        <div class="comic-title">La guerra comienza</div>
+        <div class="comic-title">Nacimiento de un heroe</div>
       </div>
       <div class="comic-item" onclick="openComic('temporada2')">
         <img src="https://picsum.photos/300/400?random=2">
-        <div class="comic-title">Temporada 2</div>
+        <div class="comic-title">La guerra comienza</div>
       </div>
       <div class="comic-item" onclick="openComic('temporada3')">
         <img src="https://picsum.photos/300/400?random=3">
-        <div class="comic-title">Temporada 3</div>
+        <div class="comic-title">Camino a casa</div>
       </div>
     </div>
   </div>
@@ -364,6 +465,21 @@
       if (pageIndex > 0) {
         loadPage(pageIndex - 1);
       }
+    }
+
+    // Función de búsqueda
+    function filterComics() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const comicItems = document.querySelectorAll('.comic-item');
+      
+      comicItems.forEach(item => {
+        const title = item.querySelector('.comic-title').textContent.toLowerCase();
+        if (title.includes(searchTerm)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
     }
 
     // Control táctil por deslizamiento y clic
