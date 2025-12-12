@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Velatron Comics</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+      background: linear-gradient(to bottom, #0a1520, #162838);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: #00ff88;
+      font-size: 36px;
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: rgba(224, 224, 224, 0.7);
+      font-size: 16px;
+    }
+
+    .form-card {
+      background: linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%);
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(0, 255, 136, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      color: #00ff88;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 15px;
+      background: rgba(10, 21, 32, 0.8);
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      border-radius: 10px;
+      color: #e0e0e0;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: #00ff88;
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+    }
+
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 30px;
+      background: rgba(10, 21, 32, 0.8);
+      border: 3px dashed rgba(0, 255, 136, 0.4);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .file-label:hover {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.1);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    }
+
+    .file-label-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .file-icon {
+      font-size: 48px;
+    }
+
+    .file-text {
+      font-size: 16px;
+      color: #e0e0e0;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0, 255, 136, 0.1);
+      border-radius: 5px;
+      color: #00ff88;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    .help-text {
+      font-size: 13px;
+      color: rgba(224, 224, 224, 0.6);
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      border: none;
+      border-radius: 10px;
+      color: #0a1520;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 255, 136, 0.6);
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(0);
+    }
+
+    button[type="submit"]:disabled {
+      background: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%);
+      border: 2px solid #00ff88;
+      border-radius: 8px;
+      color: #00ff88;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: #0a1520;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      display: none;
+    }
+
+    .message.success {
+      background: rgba(0, 255, 136, 0.2);
+      border: 2px solid #00ff88;
+      color: #00ff88;
+    }
+
+    .message.error {
+      background: rgba(255, 68, 68, 0.2);
+      border: 2px solid #ff4444;
+      color: #ff6666;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 255, 136, 0.3);
+      border-top: 4px solid #00ff88;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .form-card {
+        padding: 25px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        padding: 12px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>⚡ Panel de Administración</h1>
+      <p class="subtitle">Agrega nuevos cómics a la colección</p>
+    </header>
+
+    <a href="index.html" class="back-link">← Volver al Inicio</a>
+
+    <div class="message" id="message"></div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Procesando archivos...</p>
+    </div>
+
+    <div class="form-card">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="comicName">Nombre del Cómic *</label>
+          <input 
+            type="text" 
+            id="comicName" 
+            name="comicName" 
+            placeholder="Ej: Nacimiento de un héroe" 
+            required
+          >
+          <p class="help-text">Este será el título que se mostrará en la portada</p>
+        </div>
+
+        <div class="form-group">
+          <label for="season">Temporada *</label>
+          <input 
+            type="text" 
+            id="season" 
+            name="season" 
+            placeholder="Ej: temporada1, temporada2, etc." 
+            required
+            pattern="[a-zA-Z0-9_-]+"
+          >
+          <p class="help-text">Solo letras, números, guiones y guiones bajos (sin espacios)</p>
+        </div>
+
+        <div class="form-group">
+          <label for="imageExtension">Extensión de Imágenes *</label>
+          <select id="imageExtension" name="imageExtension" required>
+            <option value="jpg">JPG / JPEG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WEBP</option>
+            <option value="gif">GIF</option>
+          </select>
+          <p class="help-text">Formato de las imágenes dentro del ZIP</p>
+        </div>
+
+        <div class="form-group">
+          <label for="imagePrefix">Prefijo de Imágenes</label>
+          <input 
+            type="text" 
+            id="imagePrefix" 
+            name="imagePrefix" 
+            placeholder="pagina" 
+            value="pagina"
+          >
+          <p class="help-text">Ej: "pagina" generará pagina1.jpg, pagina2.jpg...</p>
+        </div>
+
+        <div class="form-group">
+          <label for="coverImage">Imagen de Portada *</label>
+          <div class="file-upload">
+            <input 
+              type="file" 
+              id="coverImage" 
+              name="coverImage" 
+              accept="image/*"
+              required
+            >
+            <label for="coverImage" class="file-label">
+              <div class="file-label-content">
+                <span class="file-icon">🖼️</span>
+                <span class="file-text">Seleccionar imagen de portada</span>
+              </div>
+            </label>
+            <div id="coverFileName" class="file-name" style="display: none;"></div>
+          </div>
+          <p class="help-text">La imagen que aparecerá en la página principal</p>
+        </div>
+
+        <div class="form-group">
+          <label for="zipFile">Archivo ZIP con las Páginas *</label>
+          <div class="file-upload">
+            <input 
+              type="file" 
+              id="zipFile" 
+              name="zipFile" 
+              accept=".zip"
+              required
+            >
+            <label for="zipFile" class="file-label">
+              <div class="file-label-content">
+                <span class="file-icon">📦</span>
+                <span class="file-text">Seleccionar archivo ZIP</span>
+              </div>
+            </label>
+            <div id="zipFileName" class="file-name" style="display: none;"></div>
+          </div>
+          <p class="help-text">
+            ZIP conteniendo las imágenes numeradas: pagina1.jpg, pagina2.jpg, etc.
+          </p>
+        </div>
+
+        <button type="submit">Subir Cómic</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Preview de nombres de archivos
+    document.getElementById('coverImage').addEventListener('change', function(e) {
+      const fileName = e.target.files[0]?.name;
+      const fileNameDiv = document.getElementById('coverFileName');
+      if (fileName) {
+        fileNameDiv.textContent = `✓ ${fileName}`;
+        fileNameDiv.style.display = 'block';
+      } else {
+        fileNameDiv.style.display = 'none';
+      }
+    });
+
+    document.getElementById('zipFile').addEventListener('change', function(e) {
+      const fileName = e.target.files[0]?.name;
+      const fileNameDiv = document.getElementById('zipFileName');
+      if (fileName) {
+        fileNameDiv.textContent = `✓ ${fileName}`;
+        fileNameDiv.style.display = 'block';
+      } else {
+        fileNameDiv.style.display = 'none';
+      }
+    });
+
+    // Manejo del formulario
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      const loading = document.getElementById('loading');
+      const message = document.getElementById('message');
+      const submitBtn = this.querySelector('button[type="submit"]');
+      
+      // Obtener datos del formulario
+      const comicName = document.getElementById('comicName').value.trim();
+      const season = document.getElementById('season').value.trim();
+      const coverFile = document.getElementById('coverImage').files[0];
+      const zipFile = document.getElementById('zipFile').files[0];
+      
+      // Normalizar nombre del cómic para carpeta
+      const comicFolder = comicName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      
+      const folderPath = `comics/${comicFolder}/${season}`;
+      
+      // Preparar FormData
+      formData.append('comicName', comicName);
+      formData.append('season', season);
+      formData.append('comicFolder', comicFolder);
+      formData.append('folderPath', folderPath);
+      formData.append('coverImage', coverFile);
+      formData.append('zipFile', zipFile);
+      
+      console.log('📁 Enviando al servidor:', folderPath);
+      
+      // Mostrar loading
+      loading.classList.add('active');
+      message.style.display = 'none';
+      submitBtn.disabled = true;
+      
+      try {
+        // Enviar al servidor PHP
+        const response = await fetch('upload.php', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        // Ocultar loading
+        loading.classList.remove('active');
+        submitBtn.disabled = false;
+        
+        // Mostrar mensaje
+        message.style.display = 'block';
+        
+        if (result.success) {
+          message.className = 'message success';
+          message.textContent = result.message;
+          
+          console.log('✅ Éxito:', result.data);
+          
+          // Limpiar formulario
+          this.reset();
+          document.getElementById('coverFileName').style.display = 'none';
+          document.getElementById('zipFileName').style.display = 'none';
+          
+          // Redirigir después de 3 segundos
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 3000);
+        } else {
+          message.className = 'message error';
+          message.textContent = '✗ Error: ' + result.message;
+        }
+        
+      } catch (error) {
+        loading.classList.remove('active');
+        submitBtn.disabled = false;
+        message.style.display = 'block';
+        message.className = 'message error';
+        message.textContent = '✗ Error de conexión: ' + error.message;
+        console.error('Error:', error);
+      }
+    });
+
+    // Normalizar nombre de temporada en tiempo real
+    document.getElementById('season').addEventListener('input', function(e) {
+      this.value = this.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    });
+  </script>
+</body>
+</html>

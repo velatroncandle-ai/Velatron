@@ -73,7 +73,7 @@
     .comic-item img {
       width: 100%;
       height: 240px;
-      object-fit: cover;
+   
     }
 
     .comic-title {
@@ -87,7 +87,7 @@
     }
 
     .search-container {
-      max-width: 600px;
+      max-width: 300px;
       margin: 0 20px 30px 20px;
       padding: 0;
       position: relative;
@@ -474,8 +474,9 @@
 <body>
   <header>
      <!-- <div class="brand">Cómic Velatron</div> -->
-     <!--  <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
-  </header>
+       <!-- <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
+  -->
+    </header>
 
   <!-- Página principal -->
   <div id="home" class="page active">
@@ -488,7 +489,7 @@
 
     <div class="comic-grid">
       <div class="comic-item" onclick="openComic('temporada1')">
-        <img src="comics/temporada1/pagina1.jpg">
+        <img src="comics/jhon/temporada1/pagina1.avif">
         <div class="comic-title">Genesis of a Hero"</div>
       </div>
       <div class="comic-item" onclick="openComic('temporada2')">
@@ -521,18 +522,19 @@
     // Lista de temporadas con sus imágenes
     const comics = {
       temporada1: [
-        'comics/temporada1/pagina1.jpg',
-        'comics/temporada1/pagina2.jpg',
-        'comics/temporada1/pagina3.jpg',
-        'comics/temporada1/pagina4.jpg',
-        'comics/temporada1/pagina5.jpg',
-        'comics/temporada1/pagina6.jpg',
-          'comics/temporada1/pagina7.jpg',
-        'comics/temporada1/pagina8.jpg',
-        'comics/temporada1/pagina9.jpg',
-        'comics/temporada1/pagina10.jpg',
-        'comics/temporada1/pagina11.jpg',
-         'comics/temporada1/pagina12.jpg'
+        'comics/jhon/temporada1/pagina1.avif',
+        'comics/jhon/temporada1/pagina2.avif',
+        'comics/jhon/temporada1/pagina3.avif',
+        'comics/jhon/temporada1/pagina4.avif',
+        'comics/jhon/temporada1/pagina5.avif',
+        'comics/jhon/temporada1/pagina6.avif',
+          'comics/jhon/temporada1/pagina7.avif',
+        'comics/jhon/temporada1/pagina8.avif',
+        'comics/jhon/temporada1/pagina9.avif',
+        'comics/jhon/temporada1/pagina10.avif',
+        'comics/jhon/temporada1/pagina11.avif',
+         'comics/jhon/temporada1/pagina12.avif',
+         'comics/jhon/temporada1/pagina13.avif'
       ],
       temporada2: [
         'comics/keiner/temporada1/2.avif',
