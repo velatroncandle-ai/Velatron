@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CómicFlix Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.6/lib/index.iife.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -469,6 +470,23 @@
         padding-left: 10px !important;
       }
     }
+
+      #disconnectBtn { background: #d63031; display: none; }
+    #info { margin-top: 20px; font-size: 18px; }
+    
+    .wallet-controls {
+      position: absolute;
+      right: 10%;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    
+    .wallet-controls button {
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -476,7 +494,13 @@
      <!-- <div class="brand">Cómic Velatron</div> -->
        <!-- <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
   -->
-    </header>
+ 
+    <div class="wallet-controls">
+      <button id="connectBtn">Conectar Phantom</button>
+      <button id="disconnectBtn">Desconectar</button>
+      <div id="info"></div>
+    </div>
+  </header>
 
   <!-- Página principal -->
   <div id="home" class="page active">
@@ -700,5 +724,123 @@
       }
     });
   </script>
+
+   <script>
+    const connectBtn = document.getElementById("connectBtn");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+    const infoDiv = document.getElementById("info");
+
+    const TOKEN_MINT = "E5BCxeyFybFoG8waFAPJbcfuS1Pis2wowbCdz3hJpump"; // tu token SPL
+
+    // ✅ Cambiar a tu Alchemy Free RPC
+    const ALCHEMY_API_KEY = "KH_CbC8_e0Tp_HOjeUZpb"; // Copia tu API Key de Alchemy
+    const connection = new solanaWeb3.Connection(
+      `https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
+    );
+
+    let walletPublicKey = null;
+
+    // --------------------------
+    //  Conectar Phantom
+    // --------------------------
+    async function connectPhantom() {
+      const provider = window.solana;
+
+      if (!provider || !provider.isPhantom) {
+        alert("Instala Phantom: https://phantom.app");
+        return;
+      }
+
+      try {
+        const resp = await provider.connect();
+        walletPublicKey = resp.publicKey;
+        const shortWallet = walletPublicKey.toString();
+const displayWallet = `${shortWallet.slice(0, 3)}...${shortWallet.slice(-3)}`;
+
+//infoDiv.innerHTML = `<p><strong>Wallet:</strong> ${displayWallet}</p>`;
+
+        connectBtn.style.display = "none";
+        disconnectBtn.style.display = "inline-block";
+
+        //await loadSOLBalance();
+        await checkTokenBalance();
+
+      } catch (e) {
+        console.error(e);
+        alert("Error al conectar Phantom");
+      }
+    }
+
+    // --------------------------
+    //  Desconectar
+    // --------------------------
+    async function disconnectPhantom() {
+      try {
+        await window.solana.disconnect();
+      } catch (e) {}
+
+      walletPublicKey = null;
+
+      infoDiv.innerHTML = "";
+
+      disconnectBtn.style.display = "none";
+      connectBtn.style.display = "inline-block";
+    }
+
+    // --------------------------
+    // Mostrar balance SOL
+    // --------------------------
+    async function loadSOLBalance() {
+      if (!walletPublicKey) return;
+
+      try {
+        const balanceLamports = await connection.getBalance(walletPublicKey);
+        const balanceSOL = balanceLamports / solanaWeb3.LAMPORTS_PER_SOL;
+
+        infoDiv.innerHTML += `
+          <p><strong>Balance SOL:</strong> ${balanceSOL.toFixed(4)} SOL</p>
+        `;
+      } catch (e) {
+        console.error("Error al obtener balance SOL:", e);
+        infoDiv.innerHTML += `<p style="color:red">Error al obtener balance SOL</p>`;
+      }
+    }
+
+    // --------------------------
+    // Verificar si tiene un token SPL
+    // --------------------------
+    async function checkTokenBalance() {
+      if (!walletPublicKey) return;
+
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+          walletPublicKey,
+          { mint: new solanaWeb3.PublicKey(TOKEN_MINT) }
+        );
+
+        if (tokenAccounts.value.length === 0) {
+          infoDiv.innerHTML += `
+            <p>❌ No tienes velatron</p>
+          `;
+          return;
+        }
+
+        const amount = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+
+       // infoDiv.innerHTML += `<p><strong>Token:</strong> ✔ Velatron<br> <strong>Cantidad:</strong> ${amount}</p> `;
+        infoDiv.innerHTML += `
+          <p>✔ Velatron<br>
+          
+        `;
+      } catch (e) {
+        console.error("Error al obtener token SPL:", e);
+        infoDiv.innerHTML += `<p style="color:red">Error al obtener token SPL</p>`;
+      }
+    }
+
+    connectBtn.addEventListener("click", connectPhantom);
+    disconnectBtn.addEventListener("click", disconnectPhantom);
+  </script>
+
 </body>
 </html>
