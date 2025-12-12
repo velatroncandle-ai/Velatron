@@ -743,33 +743,56 @@
     // --------------------------
     //  Conectar Phantom
     // --------------------------
-    async function connectPhantom() {
-      const provider = window.solana;
+ async function connectPhantom() {
+  const provider = window.solana;
 
-      if (!provider || !provider.isPhantom) {
-        alert("Instala Phantom: https://phantom.app");
-        return;
-      }
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-      try {
-        const resp = await provider.connect();
-        walletPublicKey = resp.publicKey;
-        const shortWallet = walletPublicKey.toString();
-const displayWallet = `${shortWallet.slice(0, 3)}...${shortWallet.slice(-3)}`;
-
-//infoDiv.innerHTML = `<p><strong>Wallet:</strong> ${displayWallet}</p>`;
-
-        connectBtn.style.display = "none";
-        disconnectBtn.style.display = "inline-block";
-
-        //await loadSOLBalance();
-        await checkTokenBalance();
-
-      } catch (e) {
-        console.error(e);
-        alert("Error al conectar Phantom");
-      }
+  if (provider && provider.isPhantom) {
+    // Desktop
+    try {
+      const resp = await provider.connect();
+      walletPublicKey = resp.publicKey;
+      const shortWallet = walletPublicKey.toString();
+      const displayWallet = `${shortWallet.slice(0,3)}...${shortWallet.slice(-3)}`;
+      infoDiv.innerHTML = `<p><strong>Wallet:</strong> ${displayWallet}</p>`;
+      connectBtn.style.display = "none";
+      disconnectBtn.style.display = "inline-block";
+      await checkTokenBalance();
+    } catch(e) {
+      console.error(e);
+      alert("Error al conectar Phantom en desktop");
     }
+  } else if (isMobile) {
+    // Mobile → abrir Phantom app con deep link
+    const appUrl = encodeURIComponent(window.location.href);
+    const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${appUrl}&redirect_link=${appUrl}`;
+    window.location.href = phantomDeepLink;
+  } else {
+    alert("Instala Phantom: https://phantom.app");
+  }
+}
+
+
+async function handleMobileRedirect() {
+  // Phantom en móvil redirige con publicKey en URL (ejemplo: ?publicKey=xxxx)
+  const params = new URLSearchParams(window.location.search);
+  const pk = params.get("publicKey");
+  if (pk) {
+    walletPublicKey = new solanaWeb3.PublicKey(pk);
+    showWallet();
+    connectBtn.style.display = "none";
+    disconnectBtn.style.display = "inline-block";
+    await checkTokenBalance();
+  }
+}
+
+// -----------------
+// Detectar si viene de móvil Phantom
+// -----------------
+window.addEventListener("DOMContentLoaded", () => {
+  handleMobileRedirect();
+});
 
     // --------------------------
     //  Desconectar
