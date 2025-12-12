@@ -537,7 +537,7 @@
 
     <div class="reader-controls">
       <button onclick="prevPage()">← Prev</button>
-      <button onclick="goHome()">Inicio</button>
+      <button onclick="goHome()">Home</button>
       <button onclick="nextPage()">Next →</button>
     </div>
   </div>
@@ -618,10 +618,14 @@
       switchPage('reader');
       loadPage(0);
       initTouchControls();
+      // Ocultar controles de wallet
+      document.querySelector('.wallet-controls').style.display = 'none';
     }
 
     function goHome() {
       switchPage('home');
+      // Mostrar controles de wallet
+      document.querySelector('.wallet-controls').style.display = 'flex';
     }
 
     function switchPage(id) {
@@ -751,6 +755,7 @@
   if (provider && provider.isPhantom) {
     // Desktop
     try {
+      console.log("Redirigiendo a Phantom Desktop...");
       const resp = await provider.connect();
       walletPublicKey = resp.publicKey;
       const shortWallet = walletPublicKey.toString();
@@ -765,8 +770,9 @@
     }
   } else if (isMobile) {
     // Mobile → abrir Phantom app con deep link
-    const appUrl = encodeURIComponent(window.location.href);
-    const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${appUrl}&redirect_link=${appUrl}`;
+    console.log("Redirigiendo a Phantom móvil...");
+      const currentUrl = encodeURIComponent(window.location.href.split('?')[0]); 
+    const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${currentUrl}&redirect_link=${currentUrl}?publicKey=`;
     window.location.href = phantomDeepLink;
   } else {
     alert("Instala Phantom: https://phantom.app");
