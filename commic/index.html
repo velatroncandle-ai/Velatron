@@ -8,7 +8,8 @@
   <style>
     body {
       margin: 0;
-      background: linear-gradient(to bottom, #0a1520, #162838);
+      background: linear-gradient(to bottom, rgba(10,21,32,0.9), rgba(22,40,56,0.9)), 
+                  url('../fondo.jpg') center/cover fixed;
       font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
       color: #e0e0e0;
       overflow-x: hidden;
@@ -487,7 +488,45 @@
     .wallet-controls button {
       margin: 0;
     }
+
+
+
+/* Se ve bloqueado  */
+.comic-item {
+  position: relative;
+  opacity: 1;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.comic-item.locked {
+  opacity: 0.5;        /* Se ve bloqueado */
+}
+
+.lock-icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.7);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 20px;
+  display: none;
+}
+
+.comic-item.locked .lock-icon {
+  display: block;    /* Candado visible si está bloqueado */
+}
+
+    
   </style>
+
+<script src="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js"></script>
+<script>
+  window.Buffer = buffer.Buffer; // define global Buffer para browser
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.6/lib/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <header>
@@ -506,20 +545,34 @@
   <div id="home" class="page active">
     <h2 style="padding-left:20px; color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.4); font-size: 28px; letter-spacing: 1px;">VELATRON COMICS</h2>
     
-    <div class="search-container">
+    <div class="search-container" id="comicContent" style="display:none;">
       <input type="text" class="search-box" id="searchInput" placeholder="Buscar cómic por título..." onkeyup="filterComics()">
       <span class="search-icon">🔍</span>
     </div>
+
+ 
+
+
+
+    <div id="comicLock" style="display:block; padding:20px; background:#222; margin-top:20px;">
+  <h2>🔒 Necesitas el token Velatron para ver los cómics. Tus contribuciones apoyan marketing y quema de tokens. </h2>
+  
+  
+</div>
+ <!--<button onclick="payComic()">Pagar 0.1 SOL</button>-->
+
 
     <div class="comic-grid">
       <div class="comic-item" onclick="openComic('temporada1')">
         <img src="comics/jhon/temporada1/pagina1.avif">
         <div class="comic-title">Genesis of a Hero"</div>
       </div>
-      <div class="comic-item" onclick="openComic('temporada2')">
-        <img src="comics/keiner/temporada1/1.avif">
-        <div class="comic-title">Birth of a Hero</div>
-      </div>
+      <div class="comic-item locked" id="comic-temporada2">
+    <img src="comics/keiner/temporada1/1.avif">
+    <div class="comic-title">Birth of a Hero</div>
+    <div class="lock-icon">🔒</div>
+</div>
+
       <!-- <div class="comic-item" onclick="openComic('temporada3')">
         <img src="https://picsum.photos/300/400?random=3">
         <div class="comic-title">Birth of a Hero</div>
@@ -730,11 +783,18 @@
   </script>
 
    <script>
+//------------------------------------------------------
+// CONFIG
+//------------------------------------------------------
+const TOKEN_MINT = "E5BCxeyFybFoG8waFAPJbcfuS1Pis2wowbCdz3hJpump"; // Token Velatron
+const MERCHANT_WALLET = "3DZWHcKKBsGomyvFhSTRKPnXx3eNyKSqCoGgN4q7G5Jd"; // Tu wallet que recibe pagos
+const PRICE_SOL = 0.001;                                                  // Precio del cómic
+
     const connectBtn = document.getElementById("connectBtn");
     const disconnectBtn = document.getElementById("disconnectBtn");
     const infoDiv = document.getElementById("info");
 
-    const TOKEN_MINT = "E5BCxeyFybFoG8waFAPJbcfuS1Pis2wowbCdz3hJpump"; // tu token SPL
+
 
     // ✅ Cambiar a tu Alchemy Free RPC
     const ALCHEMY_API_KEY = "KH_CbC8_e0Tp_HOjeUZpb"; // Copia tu API Key de Alchemy
@@ -748,36 +808,46 @@
     //  Conectar Phantom
     // --------------------------
  async function connectPhantom() {
+  // Si es móvil → usar DeepLink
+  if (isMobile()) {
+    const dappUrl = encodeURIComponent(window.location.href);
+    const redirectLink = `https://phantom.app/ul/v1/connect?app_url=${dappUrl}`;
+
+    window.location.href = redirectLink;
+    return;
+  }
+
+  // Si NO es móvil → usar provider normal (window.solana)
   const provider = window.solana;
 
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  if (provider && provider.isPhantom) {
-    // Desktop
-    try {
-      console.log("Redirigiendo a Phantom Desktop...");
-      const resp = await provider.connect();
-      walletPublicKey = resp.publicKey;
-      const shortWallet = walletPublicKey.toString();
-      const displayWallet = `${shortWallet.slice(0,3)}...${shortWallet.slice(-3)}`;
-      infoDiv.innerHTML = `<p><strong>Wallet:</strong> ${displayWallet}</p>`;
-      connectBtn.style.display = "none";
-      disconnectBtn.style.display = "inline-block";
-      await checkTokenBalance();
-    } catch(e) {
-      console.error(e);
-      alert("Error al conectar Phantom en desktop");
-    }
-  } else if (isMobile) {
-    // Mobile → abrir Phantom app con deep link
-    console.log("Redirigiendo a Phantom móvil...");
-      const currentUrl = encodeURIComponent(window.location.href.split('?')[0]); 
-    const phantomDeepLink = `https://phantom.app/ul/v1/connect?app_url=${currentUrl}&redirect_link=${currentUrl}?publicKey=`;
-    window.location.href = phantomDeepLink;
-  } else {
+  if (!provider || !provider.isPhantom) {
     alert("Instala Phantom: https://phantom.app");
+    return;
+  }
+
+  try {
+    const resp = await provider.connect();
+    walletPublicKey = resp.publicKey;
+
+    const shortWallet = walletPublicKey.toString();
+    const displayWallet = `${shortWallet.slice(0, 3)}...${shortWallet.slice(-3)}`;
+
+   // infoDiv.innerHTML = `<p><strong>Wallet:</strong> ${displayWallet}</p>`;
+
+    connectBtn.style.display = "none";
+    disconnectBtn.style.display = "inline-block";
+
+    await checkTokenBalance();
+
+  } catch (e) {
+    console.error(e);
+    alert("Error al conectar Phantom");
   }
 }
+function isMobile() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 
 
 async function handleMobileRedirect() {
@@ -826,9 +896,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const balanceLamports = await connection.getBalance(walletPublicKey);
         const balanceSOL = balanceLamports / solanaWeb3.LAMPORTS_PER_SOL;
 
-        infoDiv.innerHTML += `
-          <p><strong>Balance SOL:</strong> ${balanceSOL.toFixed(4)} SOL</p>
-        `;
+        //infoDiv.innerHTML += `<p><strong>Balance SOL:</strong> ${balanceSOL.toFixed(4)} SOL</p>`;
       } catch (e) {
         console.error("Error al obtener balance SOL:", e);
         infoDiv.innerHTML += `<p style="color:red">Error al obtener balance SOL</p>`;
@@ -848,19 +916,52 @@ window.addEventListener("DOMContentLoaded", () => {
         );
 
         if (tokenAccounts.value.length === 0) {
-          infoDiv.innerHTML += `
-            <p>❌ No tienes velatron</p>
-          `;
+
+Swal.fire({
+  html: `
+    <p style="margin-bottom:10px;">❌ No tienes Velatron, adquiérelo aquí</p>
+    <a href="https://dexscreener.com/solana/26m5m3nwgake4zavkd3zetys5hjwdxe6xbwpdtslhy1o" target="_blank">
+      <img src="dex.png" 
+           alt="Velatron/SOL" 
+           style="width:60%; height:auto; border-radius:6px; object-fit:contain;">
+    </a>
+  `,
+  icon: 'warning',
+  timer: 40000,
+  showConfirmButton: true,
+  backdrop: 'rgba(0, 0, 0, 0.8)'
+});
+
+
           return;
         }
 
         const amount = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount;
 
        // infoDiv.innerHTML += `<p><strong>Token:</strong> ✔ Velatron<br> <strong>Cantidad:</strong> ${amount}</p> `;
-        infoDiv.innerHTML += `
-          <p>✔ Velatron<br>
-          
-        `;
+      //  infoDiv.innerHTML += `<p>✔ Velatron<br> `;
+  const comicItem = document.getElementById("comic-temporada2");
+const hasToken = amount > 0;
+
+  if (hasToken) {
+    document.getElementById("comicLock").style.display = "none";
+  document.getElementById("comicContent").style.display = "block";
+
+    //infoDiv.innerHTML += `<p>✔ Tienes el token Velatron</p>`;
+
+    comicItem.classList.remove("locked");
+    comicItem.onclick = () => openComic("temporada2");
+
+    //infoDiv.innerHTML += `<p>✔ Cómic desbloqueado</p>`;
+  } else {
+    document.getElementById("comicLock").style.display = "block";
+    document.getElementById("comicContent").style.display = "none";
+
+    infoDiv.innerHTML += `<p>❌ No tiene el token</p>`;
+  }
+
+
+
       } catch (e) {
         console.error("Error al obtener token SPL:", e);
         infoDiv.innerHTML += `<p style="color:red">Error al obtener token SPL</p>`;
@@ -869,6 +970,53 @@ window.addEventListener("DOMContentLoaded", () => {
 
     connectBtn.addEventListener("click", connectPhantom);
     disconnectBtn.addEventListener("click", disconnectPhantom);
+
+
+
+    //------------------------------------------------------
+// PAGAR 0.1 SOL (Comprar Cómic)
+//------------------------------------------------------
+async function payComic() {
+  if (!walletPublicKey) {
+    alert("Conéctate primero");
+    return;
+  }
+
+  try {
+    const merchantPubKey = new solanaWeb3.PublicKey(MERCHANT_WALLET);
+    const tx = new solanaWeb3.Transaction().add(
+      solanaWeb3.SystemProgram.transfer({
+        fromPubkey: walletPublicKey,
+        toPubkey: merchantPubKey,
+        lamports: PRICE_SOL * solanaWeb3.LAMPORTS_PER_SOL,
+      })
+    );
+
+    // Fijar el último blockhash
+    tx.feePayer = walletPublicKey;
+    const { blockhash } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+
+    // Firmar la transacción con Phantom
+    const signedTx = await window.solana.signTransaction(tx);
+
+    // Enviar la transacción
+    const signature = await connection.sendRawTransaction(signedTx.serialize());
+    await connection.confirmTransaction(signature);
+
+    alert("Pago realizado con éxito\nTx: " + signature);
+
+    // Desbloquear cómic
+    document.getElementById("comicLock").style.display = "none";
+    document.getElementById("comic2").classList.remove("locked");
+    document.getElementById("comic2").onclick = () => openComic("temporada2");
+
+  } catch (e) {
+    console.error(e);
+    alert("Error al pagar: " + e.message);
+  }
+}
+
   </script>
 
 </body>
