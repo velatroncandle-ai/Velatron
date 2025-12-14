@@ -929,13 +929,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
       try {
        
-          
+          if(false){
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
           walletPublicKey,
           { mint: new solanaWeb3.PublicKey(TOKEN_MINT) }
         );
-      
-          /*const tokenAccounts = {
+      }
+          const tokenAccounts = {
   value: [
     {
       account: {
@@ -951,7 +951,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
   ]
-};*/
+};
         if (tokenAccounts.value.length === 0) {
 
 Swal.fire({
