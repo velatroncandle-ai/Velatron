@@ -480,8 +480,8 @@
       right: 10%;
       top: 20px;
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+      flex-direction: row;
+      align-items: center;
       gap: 10px;
     }
     
@@ -521,11 +521,9 @@
     
   </style>
 
-<script src="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js"></script>
-<script>
-  window.Buffer = buffer.Buffer; // define global Buffer para browser
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.95.6/lib/index.iife.min.js"></script>
+
+
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -535,8 +533,10 @@
   -->
  
     <div class="wallet-controls">
+      <button id="pay" onclick="payComic()" style="display:none;">Contribute</button>
       <button id="connectBtn">Conectar Phantom</button>
       <button id="disconnectBtn">Desconectar</button>
+      
       <div id="info"></div>
     </div>
   </header>
@@ -559,8 +559,6 @@
   
   
 </div>
- <!--<button onclick="payComic()">Pagar 0.1 SOL</button>-->
-
 
     <div class="comic-grid">
       <div class="comic-item" onclick="openComic('temporada1')">
@@ -568,22 +566,18 @@
         <div class="comic-title">Genesis of a Hero"</div>
       </div>
 
-      <div class="comic-item locked" id="comic-temporada2">
+      <div class="comic-item locked" id="comic-temporada2" onclick="openComic('temporada2')">
         <img src="comics/keiner/temporada1/1.avif">
         <div class="comic-title">Guardian  Bullrun</div>
         <div class="lock-icon">🔒</div>
        </div>
 
-        <div class="comic-item locked" id="comic-temporada3">
+        <div class="comic-item locked" id="comic-temporada3" onclick="openComic('temporada3')">
         <img src="comics/ocuridad/temporada1/PORTADA.avif">
         <div class="comic-title">The Dark Warrior</div>
         <div class="lock-icon">🔒</div>
        </div>
 
-      <!-- <div class="comic-item" onclick="openComic('temporada3')">
-        <img src="https://picsum.photos/300/400?random=3">
-        <div class="comic-title">Birth of a Hero</div>
-      </div>-->
     </div>
   </div>
 
@@ -603,6 +597,7 @@
   </div>
 
   <script>
+    
     // Lista de temporadas con sus imágenes
     const comics = {
       temporada1: [
@@ -811,11 +806,15 @@
   </script>
 
    <script>
-//------------------------------------------------------
-// CONFIG
-//------------------------------------------------------
-const TOKEN_MINT = "E5BCxeyFybFoG8waFAPJbcfuS1Pis2wowbCdz3hJpump"; // Token Velatron
-const MERCHANT_WALLET = "3DZWHcKKBsGomyvFhSTRKPnXx3eNyKSqCoGgN4q7G5Jd"; // Tu wallet que recibe pagos
+const {
+  Connection,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+  LAMPORTS_PER_SOL
+} = solanaWeb3;
+const TOKEN_MINT = "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump"; // Token Velatron
+const MERCHANT_WALLET = "75kYPrYW8H8VMMdFyLMoBkzFxa4mKKiCQjNNY1arqBZM"; // Tu wallet que recibe pagos
 const PRICE_SOL = 0.001;                                                  // Precio del cómic
 
     const connectBtn = document.getElementById("connectBtn");
@@ -865,7 +864,10 @@ const PRICE_SOL = 0.001;                                                  // Pre
     connectBtn.style.display = "none";
     disconnectBtn.style.display = "inline-block";
 
-    await checkTokenBalance();
+    document.getElementById("pay").style.display = "inline-block";
+    
+    
+  await checkTokenBalance();
 
   } catch (e) {
     console.error(e);
@@ -912,24 +914,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
       disconnectBtn.style.display = "none";
       connectBtn.style.display = "inline-block";
+      document.getElementById("pay").style.display = "none";
+      desactivarClickComic();
+      bloquearComic();
     }
 
-    // --------------------------
-    // Mostrar balance SOL
-    // --------------------------
-    async function loadSOLBalance() {
-      if (!walletPublicKey) return;
-
-      try {
-        const balanceLamports = await connection.getBalance(walletPublicKey);
-        const balanceSOL = balanceLamports / solanaWeb3.LAMPORTS_PER_SOL;
-
-        //infoDiv.innerHTML += `<p><strong>Balance SOL:</strong> ${balanceSOL.toFixed(4)} SOL</p>`;
-      } catch (e) {
-        console.error("Error al obtener balance SOL:", e);
-        infoDiv.innerHTML += `<p style="color:red">Error al obtener balance SOL</p>`;
-      }
-    }
+   
 
     // --------------------------
     // Verificar si tiene un token SPL
@@ -938,11 +928,30 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!walletPublicKey) return;
 
       try {
+       
+          
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
           walletPublicKey,
           { mint: new solanaWeb3.PublicKey(TOKEN_MINT) }
         );
-
+      
+          /*const tokenAccounts = {
+  value: [
+    {
+      account: {
+        data: {
+          parsed: {
+            info: {
+              tokenAmount: {
+                uiAmount: 1000
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+};*/
         if (tokenAccounts.value.length === 0) {
 
 Swal.fire({
@@ -957,7 +966,15 @@ Swal.fire({
   icon: 'warning',
   timer: 40000,
   showConfirmButton: true,
-  backdrop: 'rgba(0, 0, 0, 0.8)'
+  backdrop: 'rgba(0, 0, 0, 0.8)',
+    background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+    color: '#e0e0e0',
+    confirmButtonColor: '#00ff88',
+    customClass: {
+      popup: 'swal-velatron-popup',
+      title: 'swal-velatron-title',
+      confirmButton: 'swal-velatron-button'
+    }
 });
 
 
@@ -972,15 +989,7 @@ Swal.fire({
 const hasToken = amount > 0;
 
   if (hasToken) {
-    document.getElementById("comicLock").style.display = "none";
-  document.getElementById("comicContent").style.display = "block";
-
-    //infoDiv.innerHTML += `<p>✔ Tienes el token Velatron</p>`;
-
-    comicItem.classList.remove("locked");
-    comicItem.onclick = () => openComic("temporada2");
-
-    //infoDiv.innerHTML += `<p>✔ Cómic desbloqueado</p>`;
+    await desb();
   } else {
     document.getElementById("comicLock").style.display = "block";
     document.getElementById("comicContent").style.display = "none";
@@ -1000,52 +1009,260 @@ const hasToken = amount > 0;
     disconnectBtn.addEventListener("click", disconnectPhantom);
 
 
-
-    //------------------------------------------------------
-// PAGAR 0.1 SOL (Comprar Cómic)
-//------------------------------------------------------
-async function payComic() {
-  if (!walletPublicKey) {
-    alert("Conéctate primero");
-    return;
-  }
+async function payComic(){
 
   try {
-    const merchantPubKey = new solanaWeb3.PublicKey(MERCHANT_WALLET);
-    const tx = new solanaWeb3.Transaction().add(
-      solanaWeb3.SystemProgram.transfer({
+    // Obtener precio de SOL en USD
+    let solPriceUSD = 0;
+    try {
+      const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+      const priceData = await priceResponse.json();
+      solPriceUSD = priceData.solana.usd;
+    } catch (e) {
+      console.error('Error al obtener precio de SOL:', e);
+      solPriceUSD = 0;
+    }
+
+    // Solicitar al usuario cuánto SOL quiere contribuir
+    const { value: inputAmount } = await Swal.fire({
+      title: 'Contribute to Velatron',
+      html: `
+        <p style="margin-bottom:15px;">Enter the amount of SOL you want to contribute</p>
+        ${solPriceUSD > 0 ? `<p style="font-size:12px;color:#888;margin-bottom:10px;">1 SOL ≈ $${solPriceUSD.toFixed(2)} USD</p>` : ''}
+        <div id="usdConversion" style="color:#00ff88;font-size:14px;margin-top:10px;min-height:20px;"></div>
+      `,
+      input: 'number',
+      inputValue: 0.008,
+      inputAttributes: {
+        min: '0.001',
+        step: '0.001',
+        placeholder: 'Amount in SOL',
+        id: 'solInput'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Continue',
+      cancelButtonText: 'Cancel',
+      backdrop: 'rgba(0, 0, 0, 0.8)',
+      background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+      color: '#e0e0e0',
+      confirmButtonColor: '#00ff88',
+      didOpen: () => {
+        const input = document.getElementById('solInput');
+        const usdDiv = document.getElementById('usdConversion');
+        
+        const updateUSD = () => {
+          const solAmount = parseFloat(input.value) || 0;
+          if (solPriceUSD > 0 && solAmount > 0) {
+            const usdAmount = (solAmount * solPriceUSD).toFixed(2);
+            usdDiv.innerHTML = `≈ $${usdAmount} USD`;
+          } else {
+            usdDiv.innerHTML = '';
+          }
+        };
+        
+        updateUSD();
+        input.addEventListener('input', updateUSD);
+      },
+      customClass: {
+        popup: 'swal-velatron-popup',
+        title: 'swal-velatron-title',
+        confirmButton: 'swal-velatron-button'
+      },
+      inputValidator: (value) => {
+        if (!value || parseFloat(value) <= 0) {
+          return 'Please enter a valid amount';
+        }
+        if (parseFloat(value) < 0.001) {
+          return 'Minimum amount is 0.001 SOL';
+        }
+      }
+    });
+
+    if (!inputAmount) return;
+
+    const montoSOL = parseFloat(inputAmount);
+    const lamports = Math.floor(montoSOL * LAMPORTS_PER_SOL);
+    const usdAmount = solPriceUSD > 0 ? (montoSOL * solPriceUSD).toFixed(2) : null;
+
+    const balance = await connection.getBalance(walletPublicKey);
+    const feeEstimate = 5000;
+
+    if (balance < lamports + feeEstimate) {
+      showAlert('error', 'Insufficient Balance', `You need at least ${(montoSOL + feeEstimate/LAMPORTS_PER_SOL).toFixed(4)} SOL (including fees)`);
+      return;
+    }
+
+    // Confirmar transacción
+    const confirmResult = await Swal.fire({
+      title: 'Confirm Contribution',
+      html: `
+        <p>You are about to contribute:</p>
+        <p><strong style="color:#00ff88;font-size:24px;">${montoSOL} SOL</strong></p>
+        ${usdAmount ? `<p style="color:#888;font-size:16px;">≈ $${usdAmount} USD</p>` : ''}
+        <p style="font-size:12px;margin-top:10px;color:#888;">Plus network fees (~0.000005 SOL)</p>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Send',
+      cancelButtonText: 'Cancel',
+      backdrop: 'rgba(0, 0, 0, 0.8)',
+      background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+      color: '#e0e0e0',
+      confirmButtonColor: '#00ff88',
+      customClass: {
+        popup: 'swal-velatron-popup',
+        title: 'swal-velatron-title',
+        confirmButton: 'swal-velatron-button'
+      }
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
+    const destino = new PublicKey(MERCHANT_WALLET);
+
+    const tx = new Transaction().add(
+      SystemProgram.transfer({
         fromPubkey: walletPublicKey,
-        toPubkey: merchantPubKey,
-        lamports: PRICE_SOL * solanaWeb3.LAMPORTS_PER_SOL,
+        toPubkey: destino,
+        lamports
       })
     );
 
-    // Fijar el último blockhash
     tx.feePayer = walletPublicKey;
-    const { blockhash } = await connection.getLatestBlockhash();
-    tx.recentBlockhash = blockhash;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    // Firmar la transacción con Phantom
     const signedTx = await window.solana.signTransaction(tx);
+    const sig = await connection.sendRawTransaction(signedTx.serialize());
 
-    // Enviar la transacción
-    const signature = await connection.sendRawTransaction(signedTx.serialize());
-    await connection.confirmTransaction(signature);
-
-    alert("Pago realizado con éxito\nTx: " + signature);
-
-    // Desbloquear cómic
-    document.getElementById("comicLock").style.display = "none";
-    document.getElementById("comic2").classList.remove("locked");
-    document.getElementById("comic2").onclick = () => openComic("temporada2");
+    const successMsg = usdAmount 
+      ? `Thank you for your ${montoSOL} SOL (≈ $${usdAmount} USD) contribution!`
+      : `Thank you for your ${montoSOL} SOL contribution!`;
+    
+    showAlert('success', 'Contribution Sent!', successMsg);
+    await desb();
 
   } catch (e) {
     console.error(e);
-    alert("Error al pagar: " + e.message);
+    showAlert('info', 'Transaction Cancelled', 'The transaction was cancelled or failed');
   }
 }
 
-  </script>
+async function desb(){
+ document.getElementById("comicLock").style.display = "none";
+  document.getElementById("comicContent").style.display = "block";
+
+    //infoDiv.innerHTML += `<p>✔ Tienes el token Velatron</p>`;
+
+
+    activarClicComics();
+    desbloCommic()
+}
+
+
+
+function desactivarClickComic() {
+  const comicsBloqueados = document.querySelectorAll(
+    ".comic-grid .comic-item"
+  );
+
+  comicsBloqueados.forEach(comic => {
+    if (comic.id) {
+      //desactivarClic(comic.id);
+        document.getElementById(comic.id).style.pointerEvents = "none";
+    }
+  });
+}
+
+function activarClicComics() {
+  const comicsBloqueados = document.querySelectorAll(
+    ".comic-grid .comic-item"
+  );
+
+  comicsBloqueados.forEach(comic => {
+    if (comic.id) {
+     // activarClic(comic.id);
+     document.getElementById(comic.id).style.pointerEvents = "auto";
+    }
+  });
+}
+
+function desbloCommic() {
+  const todosLosComics = document.querySelectorAll(
+  ".comic-grid .comic-item"
+);
+todosLosComics.forEach(comic => {
+  comic.classList.remove("locked");
+
+  const lockIcon = comic.querySelector(".lock-icon");
+  if (lockIcon) lockIcon.remove();
+});
+}
+
+function bloquearComic() {
+  const todosLosComics = document.querySelectorAll(
+    ".comic-grid .comic-item"
+  );
+
+  todosLosComics.forEach(comic => {
+    // 1️⃣ Agregar estilo bloqueado
+    comic.classList.add("locked");
+
+    // 2️⃣ Desactivar clic
+    comic.style.pointerEvents = "none";
+
+    // 3️⃣ Agregar icono 🔒 si no existe
+    if (!comic.querySelector(".lock-icon")) {
+      const lock = document.createElement("div");
+      lock.className = "lock-icon";
+      lock.textContent = "🔒";
+      comic.appendChild(lock);
+    }
+  });
+}
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  desactivarClickComic();
+});
+
+ 
+ 
+ 
+ 
+ 
+ 
+ function showAlert(type, title, message) {
+  Swal.fire({
+    icon: type, // 'error' | 'warning' | 'success' | 'info'
+    title: title,
+    text: message,
+    confirmButtonText: 'Aceptar',
+    backdrop: 'rgba(0, 0, 0, 0.8)',
+    background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+    color: '#e0e0e0',
+    confirmButtonColor: '#00ff88',
+    customClass: {
+      popup: 'swal-velatron-popup',
+      title: 'swal-velatron-title',
+      confirmButton: 'swal-velatron-button'
+    }
+  });
+}
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </script>
+
+
+
+
 
 </body>
 </html>
