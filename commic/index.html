@@ -577,6 +577,12 @@
         <div class="comic-title">The Dark Warrior</div>
         <div class="lock-icon">🔒</div>
        </div>
+	   
+	   <div class="comic-item locked" id="comic-temporada4" onclick="openComic('temporada4')">
+        <img src="comics/velas/temporada1/PORTADA.avif">
+        <div class="comic-title">The Dark Warrior</div>
+        <div class="lock-icon">🔒</div>
+       </div>
 
     </div>
   </div>
@@ -680,7 +686,20 @@
         'comics/ocuridad/temporada1/21.avif'
 
 
-      ]
+      ],
+      temporada4: [
+        'comics/velas/temporada1/1.avif',
+        'comics/velas/temporada1/2.avif',
+        'comics/velas/temporada1/3.avif',
+        'comics/velas/temporada1/4.avif',
+        'comics/velas/temporada1/5.avif',
+        'comics/velas/temporada1/6.avif',
+        'comics/velas/temporada1/7.avif',
+        'comics/velas/temporada1/8.avif',
+        'comics/velas/temporada1/9.avif',
+        'comics/velas/temporada1/10.avif',
+        'comics/velas/temporada1/11.avif'
+       ]
     };
 
     let currentComic = [];
@@ -929,13 +948,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
       try {
        
-          if(false){
+        
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
           walletPublicKey,
           { mint: new solanaWeb3.PublicKey(TOKEN_MINT) }
         );
-      }
-          const tokenAccounts = {
+      
+          /*const tokenAccounts = {
   value: [
     {
       account: {
@@ -951,7 +970,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
   ]
-};
+};*/
         if (tokenAccounts.value.length === 0) {
 
 Swal.fire({
