@@ -518,19 +518,236 @@
   display: block;    /* Candado visible si está bloqueado */
 }
 
+/* Stats en miniaturas */
+.comic-stats {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 10;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.stat-item.likes {
+  color: #ff6b9d;
+}
+
+.stat-item.rating {
+  color: #ffd700;
+}
+
+.stat-icon {
+  font-size: 16px;
+}
+
+@media (max-width: 480px) {
+  .comic-stats {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  .stat-icon {
+    font-size: 14px;
+  }
+}
+
     
+/* Sistema de likes y puntuación */
+.comic-interactions {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%);
+  border: 2px solid rgba(0,255,136,0.3);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  z-index: 1000;
+  min-width: 200px;
+  backdrop-filter: blur(10px);
+}
+
+.like-section {
+  text-align: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(0,255,136,0.2);
+}
+
+.like-button {
+  background: transparent;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 5px;
+  margin: 0;
+  filter: grayscale(100%);
+}
+
+.like-button:hover {
+  transform: scale(1.2);
+  filter: grayscale(0%);
+}
+
+.like-button.liked {
+  filter: grayscale(0%);
+  animation: heartbeat 0.5s;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(1.1); }
+  75% { transform: scale(1.25); }
+}
+
+.like-count {
+  display: block;
+  color: #00ff88;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.rating-section {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(0,255,136,0.2);
+}
+
+.rating-title {
+  color: #00ff88;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.star {
+  font-size: 30px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #444;
+}
+
+.star:hover,
+.star.active {
+  color: #ffd700;
+  transform: scale(1.2);
+}
+
+.rating-display {
+  text-align: center;
+  color: #00ff88;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.rating-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.rating-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00cc6a);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0,255,136,0.5);
+}
+
+.donate-section {
+  text-align: center;
+}
+
+.donate-button {
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+}
+
+.donate-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+  background: linear-gradient(135deg, #ffed4e 0%, #ff9e1b 100%);
+}
+
+.donate-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .comic-interactions {
+    bottom: 10px;
+    right: 10px;
+    padding: 15px;
+    min-width: 160px;
+  }
+  
+  .like-button {
+    font-size: 32px;
+  }
+  
+  .star {
+    font-size: 24px;
+  }
+  
+  .donate-button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+}
+
   </style>
 
 
 
-<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <header>
-     <!-- <div class="brand">Cómic Velatron</div> -->
-       <!-- <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
-  -->
+    
+       <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
+  
  
     <div class="wallet-controls">
       <button id="pay" onclick="payComic()" style="display:none;">Contribute</button>
@@ -560,30 +777,8 @@
   
 </div>
 
-    <div class="comic-grid">
-      <div class="comic-item" onclick="openComic('temporada1')">
-        <img src="comics/jhon/temporada1/pagina1.avif">
-        <div class="comic-title">Genesis of a Hero"</div>
-      </div>
-
-      <div class="comic-item locked" id="comic-temporada2" onclick="openComic('temporada2')">
-        <img src="comics/keiner/temporada1/1.avif">
-        <div class="comic-title">Guardian  Bullrun</div>
-        <div class="lock-icon">🔒</div>
-       </div>
-
-        <div class="comic-item locked" id="comic-temporada3" onclick="openComic('temporada3')">
-        <img src="comics/ocuridad/temporada1/PORTADA.avif">
-        <div class="comic-title">The Dark Warrior</div>
-        <div class="lock-icon">🔒</div>
-       </div>
-	   
-	   <div class="comic-item locked" id="comic-temporada4" onclick="openComic('temporada4')">
-        <img src="comics/velas/temporada1/portada.avif">
-        <div class="comic-title">CRONICLES</div>
-        <div class="lock-icon">🔒</div>
-       </div>
-
+    <div class="comic-grid" id="comicGridContainer">
+      <!-- Los cómics se cargan dinámicamente aquí -->
     </div>
   </div>
 
@@ -602,107 +797,187 @@
     </div>
   </div>
 
+  <!-- Panel de interacciones -->
+  <div class="comic-interactions" id="interactionsPanel" style="display: none;">
+    <!-- Sección de likes -->
+    <div class="like-section">
+      <button class="like-button" id="likeBtn" onclick="toggleLike()" title="Me gusta">❤️</button>
+      <span class="like-count" id="likeCount">0</span>
+    </div>
+    
+    <!-- Sección de puntuación -->
+    <div class="rating-section">
+      <div class="rating-title">Tu puntuación</div>
+      <div class="star-rating" id="starRating">
+        <span class="star" onclick="rateComic(1)">★</span>
+        <span class="star" onclick="rateComic(2)">★</span>
+        <span class="star" onclick="rateComic(3)">★</span>
+        <span class="star" onclick="rateComic(4)">★</span>
+        <span class="star" onclick="rateComic(5)">★</span>
+      </div>
+      <div class="rating-display">
+        <span id="ratingScore">0</span>/100
+      </div>
+      <div class="rating-bar">
+        <div class="rating-bar-fill" id="ratingBarFill" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <!-- Botón de donación -->
+    <div class="donate-section">
+      <button class="donate-button" onclick="openDonateModal()">
+        <span>💝</span>
+        <span>Apoyar al creador</span>
+      </button>
+    </div>
+  </div>
+
   <script>
     
-    // Lista de temporadas con sus imágenes
-    const comics = {
-      temporada1: [
-        'comics/jhon/temporada1/pagina1.avif',
-        'comics/jhon/temporada1/pagina2.avif',
-        'comics/jhon/temporada1/pagina3.avif',
-        'comics/jhon/temporada1/pagina4.avif',
-        'comics/jhon/temporada1/pagina5.avif',
-        'comics/jhon/temporada1/pagina6.avif',
-        'comics/jhon/temporada1/pagina7.avif',
-        'comics/jhon/temporada1/pagina8.avif',
-        'comics/jhon/temporada1/pagina9.avif',
-        'comics/jhon/temporada1/pagina10.avif',
-        'comics/jhon/temporada1/pagina11.avif',
-         'comics/jhon/temporada1/pagina12.avif',
-         'comics/jhon/temporada1/pagina13.avif'
-      ],
-      temporada2: [
-        'comics/keiner/temporada1/2.avif',
-        'comics/keiner/temporada1/3.avif',
-        'comics/keiner/temporada1/4.avif',
-        'comics/keiner/temporada1/5.avif',
-        'comics/keiner/temporada1/6.avif',
-        'comics/keiner/temporada1/7.avif',
-        'comics/keiner/temporada1/8.avif',
-        'comics/keiner/temporada1/9.avif',
-        'comics/keiner/temporada1/10.avif',
-        'comics/keiner/temporada1/11.avif',
-        'comics/keiner/temporada1/12.avif',
-        'comics/keiner/temporada1/13.avif',
-        'comics/keiner/temporada1/14.avif',
-        'comics/keiner/temporada1/15.avif',
-        'comics/keiner/temporada1/16.avif',
-        'comics/keiner/temporada1/17.avif',
-        'comics/keiner/temporada1/18.avif',
-        'comics/keiner/temporada1/19.avif',
-        'comics/keiner/temporada1/20.avif',
-        'comics/keiner/temporada1/21.avif',
-        'comics/keiner/temporada1/22.avif',
-        'comics/keiner/temporada1/23.avif',
-        'comics/keiner/temporada1/24.avif',
-        'comics/keiner/temporada1/25.avif',
-        'comics/keiner/temporada1/26.avif',
-        'comics/keiner/temporada1/27.avif',
-        'comics/keiner/temporada1/28.avif',
-        'comics/keiner/temporada1/29.avif',
-        'comics/keiner/temporada1/30.avif',
-        'comics/keiner/temporada1/31.avif',
-        'comics/keiner/temporada1/32.avif',
-        'comics/keiner/temporada1/33.avif',
-        'comics/keiner/temporada1/34.avif',
-        'comics/keiner/temporada1/35.avif',
-        'comics/keiner/temporada1/36.avif',
-        'comics/keiner/temporada1/37.avif',
-        'comics/keiner/temporada1/38.avif',
-        'comics/keiner/temporada1/39.avif'
-      ],
-      temporada3: [
-        'comics/ocuridad/temporada1/1.avif',
-        'comics/ocuridad/temporada1/2.avif',
-        'comics/ocuridad/temporada1/3.avif',
-        'comics/ocuridad/temporada1/4.avif',
-        'comics/ocuridad/temporada1/5.avif',
-        'comics/ocuridad/temporada1/6.avif',
-        'comics/ocuridad/temporada1/7.avif',
-        'comics/ocuridad/temporada1/8.avif',
-        'comics/ocuridad/temporada1/9.avif',
-        'comics/ocuridad/temporada1/10.avif',
-        'comics/ocuridad/temporada1/11.avif',
-        'comics/ocuridad/temporada1/12.avif',
-        'comics/ocuridad/temporada1/13.avif',
-        'comics/ocuridad/temporada1/14.avif',
-        'comics/ocuridad/temporada1/15.avif',
-        'comics/ocuridad/temporada1/16.avif',
-        'comics/ocuridad/temporada1/17.avif',
-        'comics/ocuridad/temporada1/18.avif',
-        'comics/ocuridad/temporada1/19.avif',
+    // Lista de temporadas con sus imágenes (se carga dinámicamente desde el servidor)
+    let comics = {};
+    
+    // Mapeo de metadata de los cómics
+    let comicsMetadata = {};
 
-        'comics/ocuridad/temporada1/20.avif',
-        'comics/ocuridad/temporada1/21.avif'
+    // Cargar cómics dinámicamente desde el servidor o JSON
+    async function loadComicsFromServer() {
+      try {
+        // Intentar primero desde el servidor Python
+        const response = await fetch('http://localhost:5000/list-comics');
+        const data = await response.json();
+        
+        if (data.success && data.comics) {
+          processComicsData(data.comics);
+          console.log('✅ Cómics cargados desde servidor Python:', Object.keys(comics).length);
+          return true;
+        }
+      } catch (error) {
+        console.log('⚠️ Servidor Python no disponible, intentando con comics.json...');
+        
+        // Fallback: intentar cargar desde comics.json
+        try {
+          const response = await fetch('comics.json');
+          const data = await response.json();
+          processComicsData(data);
+          console.log('✅ Cómics cargados desde comics.json:', Object.keys(comics).length);
+          return true;
+        } catch (jsonError) {
+          console.error('❌ Error: No se pudo cargar ningún cómic');
+          console.error('- Servidor Python no disponible en http://localhost:5000');
+          console.error('- Archivo comics.json no encontrado');
+          console.error('Soluciones:');
+          console.error('1. Inicia el servidor: python server.py');
+          console.error('2. O genera comics.json: python generate_comics_json.py');
+          return false;
+        }
+      }
+    }
 
+    // Procesar datos de cómics desde cualquier fuente
+    function processComicsData(comicsData) {
+      const newComics = {};
+      comicsMetadata = {};
+      
+      // Mapear los datos al formato esperado
+      Object.keys(comicsData).forEach(key => {
+        const comic = comicsData[key];
+        newComics[key] = comic.images;
+        comicsMetadata[key] = {
+          cover: comic.cover,
+          folder: comic.folder,
+          season: comic.season,
+          count: comic.count
+        };
+      });
+      
+      // Si hay cómics, reemplazar los estáticos
+      if (Object.keys(newComics).length > 0) {
+        comics = newComics;
+        renderComicGrid();
+      }
+    }
 
-      ],
-      temporada4: [
-        'comics/velas/temporada1/1.avif',
-        'comics/velas/temporada1/2.avif',
-        'comics/velas/temporada1/3.avif',
-        'comics/velas/temporada1/4.avif',
-        'comics/velas/temporada1/5.avif',
-        'comics/velas/temporada1/6.avif',
-        'comics/velas/temporada1/7.avif',
-        'comics/velas/temporada1/8.avif',
-        'comics/velas/temporada1/9.avif',
-        'comics/velas/temporada1/10.avif',
-        'comics/velas/temporada1/11.avif'
-       ]
-    };
+    // Renderizar dinámicamente el grid de cómics
+    function renderComicGrid() {
+      const container = document.getElementById('comicGridContainer');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      Object.keys(comics).forEach((comicId, index) => {
+        const metadata = comicsMetadata[comicId];
+        const isFirstComic = index === 0;
+        
+        // Crear elemento del cómic
+        const comicDiv = document.createElement('div');
+        comicDiv.className = isFirstComic ? 'comic-item' : 'comic-item locked';
+        comicDiv.id = `comic-${comicId}`;
+        comicDiv.onclick = () => openComic(comicId);
+        comicDiv.style.position = 'relative';
+        
+        // Stats
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'comic-stats';
+        statsDiv.innerHTML = `
+          <div class="stat-item likes">
+            <span class="stat-icon">❤️</span>
+            <span id="likes-${comicId}">0</span>
+          </div>
+          <div class="stat-item rating">
+            <span class="stat-icon">⭐</span>
+            <span id="rating-${comicId}">0</span>
+          </div>
+        `;
+        
+        // Imagen
+        const img = document.createElement('img');
+        img.src = metadata.cover;
+        img.alt = metadata.folder;
+        
+        // Título
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'comic-title';
+        titleDiv.textContent = metadata.folder.charAt(0).toUpperCase() + metadata.folder.slice(1);
+        
+        // Lock icon para cómics bloqueados
+        if (!isFirstComic) {
+          const lockDiv = document.createElement('div');
+          lockDiv.className = 'lock-icon';
+          lockDiv.textContent = '🔒';
+          comicDiv.appendChild(lockDiv);
+        }
+        
+        comicDiv.appendChild(statsDiv);
+        comicDiv.appendChild(img);
+        comicDiv.appendChild(titleDiv);
+        
+        container.appendChild(comicDiv);
+      });
+      
+      // Cargar stats después de renderizar
+      loadAllComicsStats();
+    }
+
+    // Función para filtrar cómics por búsqueda
+    function filterComics() {
+      const searchInput = document.getElementById('searchInput');
+      const filter = searchInput.value.toLowerCase();
+      const comicItems = document.querySelectorAll('.comic-item');
+      
+      comicItems.forEach(item => {
+        const title = item.querySelector('.comic-title').textContent.toLowerCase();
+        
+        if (title.includes(filter)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
 
     let currentComic = [];
+    let currentComicId = '';
     let pageIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
@@ -710,17 +985,26 @@
 
     function openComic(temporada = 'temporada1') {
       currentComic = comics[temporada] || comics.temporada1;
+      currentComicId = temporada;
       switchPage('reader');
       loadPage(0);
       initTouchControls();
       // Ocultar controles de wallet
       document.querySelector('.wallet-controls').style.display = 'none';
+      // Mostrar panel de interacciones y cargar datos del cómic
+      document.getElementById('interactionsPanel').style.display = 'block';
+      loadInteractionData();
     }
 
     function goHome() {
       switchPage('home');
       // Mostrar controles de wallet
       document.querySelector('.wallet-controls').style.display = 'flex';
+      // Ocultar panel de interacciones
+      document.getElementById('interactionsPanel').style.display = 'none';
+      currentComicId = '';
+      // Recargar stats actualizados
+      loadAllComicsStats();
     }
 
     function switchPage(id) {
@@ -758,32 +1042,17 @@
         loadPage(pageIndex + 1, 'next');
       }
     }
-    
-    function prevPage() { 
+
+    function prevPage() {
       if (pageIndex > 0) {
         loadPage(pageIndex - 1, 'prev');
       }
     }
 
-    // Función de búsqueda
-    function filterComics() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const comicItems = document.querySelectorAll('.comic-item');
-      
-      comicItems.forEach(item => {
-        const title = item.querySelector('.comic-title').textContent.toLowerCase();
-        if (title.includes(searchTerm)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    }
-
-    // Control táctil por deslizamiento y clic
     function initTouchControls() {
       const comicImg = document.getElementById('comicPage');
       
+      // Eventos táctiles para swipe
       comicImg.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
       }, { passive: true });
@@ -816,12 +1085,274 @@
       }
     }
 
-    // Inicializar en carga de página si ya estamos en el lector
-    window.addEventListener('DOMContentLoaded', () => {
+    // Cargar stats de todos los cómics para mostrar en miniaturas
+    function loadAllComicsStats() {
+      const comicIds = ['temporada1', 'temporada2', 'temporada3', 'temporada4'];
+      
+      comicIds.forEach(comicId => {
+        const savedData = localStorage.getItem(`comicInteractions_${comicId}`);
+        let likes = 0;
+        let rating = 0;
+        
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          likes = data.likes || 0;
+          const totalRatings = data.totalRatings || 0;
+          const sumRatings = data.sumRatings || 0;
+          rating = totalRatings > 0 ? Math.round(sumRatings / totalRatings) : 0;
+        }
+        
+        // Actualizar UI
+        const likesElement = document.getElementById(`likes-${comicId}`);
+        const ratingElement = document.getElementById(`rating-${comicId}`);
+        
+        if (likesElement) likesElement.textContent = likes;
+        if (ratingElement) ratingElement.textContent = rating;
+      });
+    }
+
+    // Cargar stats de todos los cómics para mostrar en miniaturas
+    function loadAllComicsStats() {
+      const comicIds = ['temporada1', 'temporada2', 'temporada3', 'temporada4'];
+      
+      comicIds.forEach(comicId => {
+        const savedData = localStorage.getItem(`comicInteractions_${comicId}`);
+        let likes = 0;
+        let rating = 0;
+        
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          likes = data.likes || 0;
+          const totalRatings = data.totalRatings || 0;
+          const sumRatings = data.sumRatings || 0;
+          rating = totalRatings > 0 ? Math.round(sumRatings / totalRatings) : 0;
+        }
+        
+        // Actualizar UI
+        const likesElement = document.getElementById(`likes-${comicId}`);
+        const ratingElement = document.getElementById(`rating-${comicId}`);
+        
+        if (likesElement) likesElement.textContent = likes;
+        if (ratingElement) ratingElement.textContent = rating;
+      });
+    }
+
+    // Inicializar en carga de página
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Intentar conectar automáticamente si ya estaba conectado
+      await checkAutoConnect();
+      
+      // 2. Manejar redirección móvil de Phantom
+      handleMobileRedirect();
+      
+      // 3. Cargar cómics dinámicamente
+      await loadComicsFromServer();
+      
+      // 4. Inicializar controles si estamos en el lector
       if (document.getElementById('reader').classList.contains('active')) {
         initTouchControls();
       }
+      
+      // 5. Cargar datos de interacciones
+      loadInteractionData();
+      loadAllComicsStats();
+      
+      // 6. Desactivar cómics bloqueados hasta que conecte wallet
+      desactivarClickComic();
     });
+    
+    // Función para auto-conectar si el usuario ya autorizó previamente
+    async function checkAutoConnect() {
+      try {
+        // Priorizar window.phantom.solana sobre window.solana
+        let provider = null;
+        if (window.phantom?.solana?.isPhantom) {
+          provider = window.phantom.solana;
+        } else if (window.solana?.isPhantom) {
+          provider = window.solana;
+        }
+        
+        if (provider) {
+          // Intentar conexión silenciosa solo si ya está autorizado
+          const resp = await provider.connect({ onlyIfTrusted: true });
+          if (resp.publicKey) {
+            walletPublicKey = resp.publicKey;
+            connectBtn.style.display = "none";
+            disconnectBtn.style.display = "inline-block";
+            document.getElementById("pay").style.display = "inline-block";
+            await checkTokenBalance();
+            console.log('✅ Auto-conectado a Phantom');
+          }
+        }
+      } catch (e) {
+        // Silencioso - no molestar al usuario si no está conectado
+        console.log('No hay conexión previa con Phantom');
+      }
+    }
+
+    // Sistema de likes y puntuación
+    let likes = 0;
+    let hasLiked = false;
+    let userRating = 0;
+    let totalRatings = 0;
+    let sumRatings = 0;
+
+    // Cargar datos de localStorage específicos del cómic actual
+    function loadInteractionData() {
+      if (!currentComicId) return;
+      
+      const savedData = localStorage.getItem(`comicInteractions_${currentComicId}`);
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        likes = data.likes || 0;
+        hasLiked = data.hasLiked || false;
+        userRating = data.userRating || 0;
+        totalRatings = data.totalRatings || 0;
+        sumRatings = data.sumRatings || 0;
+      } else {
+        // Resetear valores si es un cómic nuevo
+        likes = 0;
+        hasLiked = false;
+        userRating = 0;
+        totalRatings = 0;
+        sumRatings = 0;
+      }
+      updateLikeDisplay();
+      updateRatingDisplay();
+    }
+
+    // Guardar datos en localStorage específicos del cómic actual
+    function saveInteractionData() {
+      if (!currentComicId) return;
+      
+      const data = {
+        likes,
+        hasLiked,
+        userRating,
+        totalRatings,
+        sumRatings
+      };
+      localStorage.setItem(`comicInteractions_${currentComicId}`, JSON.stringify(data));
+    }
+
+    // Toggle like
+    function toggleLike() {
+      const likeBtn = document.getElementById('likeBtn');
+      if (!hasLiked) {
+        likes++;
+        hasLiked = true;
+        likeBtn.classList.add('liked');
+      } else {
+        likes--;
+        hasLiked = false;
+        likeBtn.classList.remove('liked');
+      }
+      updateLikeDisplay();
+      saveInteractionData();
+      // Actualizar miniatura
+      updateComicThumbnail();
+    }
+
+    // Actualizar visualización de likes
+    function updateLikeDisplay() {
+      document.getElementById('likeCount').textContent = likes;
+      const likeBtn = document.getElementById('likeBtn');
+      if (hasLiked) {
+        likeBtn.classList.add('liked');
+      } else {
+        likeBtn.classList.remove('liked');
+      }
+    }
+
+    // Puntuación con estrellas (1-5 estrellas = 0-100 puntos)
+    function rateComic(stars) {
+      // Si el usuario ya había calificado, restar su calificación anterior
+      if (userRating > 0) {
+        sumRatings -= userRating;
+      } else {
+        totalRatings++;
+      }
+      
+      userRating = stars * 20; // Convertir 1-5 estrellas a 0-100
+      sumRatings += userRating;
+      
+      updateRatingDisplay();
+      saveInteractionData();
+      // Actualizar miniatura
+      updateComicThumbnail();
+      
+      // Animación de estrellas
+      const allStars = document.querySelectorAll('.star');
+      allStars.forEach((star, index) => {
+        if (index < stars) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    // Actualizar miniatura del cómic actual
+    function updateComicThumbnail() {
+      if (!currentComicId) return;
+      
+      const likesElement = document.getElementById(`likes-${currentComicId}`);
+      const ratingElement = document.getElementById(`rating-${currentComicId}`);
+      const averageRating = totalRatings > 0 ? Math.round(sumRatings / totalRatings) : 0;
+      
+      if (likesElement) likesElement.textContent = likes;
+      if (ratingElement) ratingElement.textContent = averageRating;
+    }
+
+    // Actualizar visualización de puntuación
+    function updateRatingDisplay() {
+      const averageRating = totalRatings > 0 ? Math.round(sumRatings / totalRatings) : 0;
+      document.getElementById('ratingScore').textContent = averageRating;
+      document.getElementById('ratingBarFill').style.width = averageRating + '%';
+      
+      // Actualizar estrellas según la calificación del usuario
+      const userStars = userRating / 20;
+      const allStars = document.querySelectorAll('.star');
+      allStars.forEach((star, index) => {
+        if (index < userStars) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    // Abrir modal de donación (integrado con el sistema existente)
+    function openDonateModal() {
+      if (!walletPublicKey) {
+        Swal.fire({
+          title: 'Conecta tu wallet',
+          text: 'Necesitas conectar Phantom para donar al creador',
+          icon: 'info',
+          confirmButtonText: 'Conectar',
+          backdrop: 'rgba(0, 0, 0, 0.8)',
+          background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+          color: '#e0e0e0',
+          confirmButtonColor: '#00ff88'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            connectPhantom();
+          }
+        });
+        return;
+      }
+      // Llamar a la función de pago existente
+      payComic();
+      
+      // Registrar que el usuario donó para este cómic
+      const donationData = localStorage.getItem(`comicDonations_${currentComicId}`);
+      const donations = donationData ? JSON.parse(donationData) : [];
+      donations.push({
+        timestamp: new Date().toISOString(),
+        wallet: walletPublicKey.toString().slice(0, 8)
+      });
+      localStorage.setItem(`comicDonations_${currentComicId}`, JSON.stringify(donations));
+    }
   </script>
 
    <script>
@@ -858,39 +1389,100 @@ const PRICE_SOL = 0.001;                                                  // Pre
   if (isMobile()) {
     const dappUrl = encodeURIComponent(window.location.href);
     const redirectLink = `https://phantom.app/ul/v1/connect?app_url=${dappUrl}`;
-
     window.location.href = redirectLink;
     return;
   }
 
-  // Si NO es móvil → usar provider normal (window.solana)
-  const provider = window.solana;
+  // Esperar a que Phantom esté disponible (evitar conflictos con otras wallets)
+  let provider = null;
+  
+  // Intentar obtener Phantom específicamente
+  if (window.phantom?.solana?.isPhantom) {
+    provider = window.phantom.solana;
+    console.log('✅ Usando window.phantom.solana');
+  } else if (window.solana?.isPhantom) {
+    provider = window.solana;
+    console.log('✅ Usando window.solana');
+  }
 
-  if (!provider || !provider.isPhantom) {
-    alert("Instala Phantom: https://phantom.app");
+  if (!provider) {
+    Swal.fire({
+      title: 'Phantom no detectado',
+      text: 'Instala la extensión de Phantom para continuar',
+      icon: 'warning',
+      confirmButtonText: 'Ir a Phantom.app',
+      backdrop: 'rgba(0, 0, 0, 0.8)',
+      background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+      color: '#e0e0e0',
+      confirmButtonColor: '#00ff88'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.open('https://phantom.app', '_blank');
+      }
+    });
     return;
   }
 
   try {
-    const resp = await provider.connect();
-    walletPublicKey = resp.publicKey;
+    // Verificar si ya está conectado
+    if (provider.isConnected && provider.publicKey) {
+      walletPublicKey = provider.publicKey;
+      console.log('✅ Ya estaba conectado a Phantom');
+    } else {
+      // Solicitar conexión explícita
+      console.log('🔄 Solicitando conexión a Phantom...');
+      const resp = await provider.connect();
+      walletPublicKey = resp.publicKey;
+      console.log('✅ Conectado a Phantom exitosamente');
+    }
 
     const shortWallet = walletPublicKey.toString();
     const displayWallet = `${shortWallet.slice(0, 3)}...${shortWallet.slice(-3)}`;
 
-   // infoDiv.innerHTML = `<p><strong>Wallet:</strong> ${displayWallet}</p>`;
-
     connectBtn.style.display = "none";
     disconnectBtn.style.display = "inline-block";
-
     document.getElementById("pay").style.display = "inline-block";
     
-    
-  await checkTokenBalance();
+    await checkTokenBalance();
 
   } catch (e) {
-    console.error(e);
-    alert("Error al conectar Phantom");
+    console.error('❌ Error conectando Phantom:', e);
+    
+    // Manejar diferentes tipos de errores
+    if (e.code === 4001 || e.message?.includes('User rejected')) {
+      Swal.fire({
+        title: 'Conexión cancelada',
+        text: 'Rechazaste la conexión con Phantom',
+        icon: 'info',
+        confirmButtonText: 'OK',
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+        color: '#e0e0e0',
+        confirmButtonColor: '#00ff88'
+      });
+    } else if (e.code === -32603) {
+      Swal.fire({
+        title: 'Error interno de Phantom',
+        html: 'Intenta:<br>1. Cerrar y abrir Phantom<br>2. Refrescar la página<br>3. Reinstalar Phantom si persiste',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+        color: '#e0e0e0',
+        confirmButtonColor: '#00ff88'
+      });
+    } else {
+      Swal.fire({
+        title: 'Error de conexión',
+        html: `No se pudo conectar con Phantom.<br><small>Error: ${e.message || 'Desconocido'}</small>`,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+        color: '#e0e0e0',
+        confirmButtonColor: '#00ff88'
+      });
+    }
   }
 }
 function isMobile() {
@@ -905,9 +1497,15 @@ async function handleMobileRedirect() {
   const pk = params.get("publicKey");
   if (pk) {
     walletPublicKey = new solanaWeb3.PublicKey(pk);
-    showWallet();
+    
+    // Mostrar wallet conectada
+    const shortWallet = pk;
+    const displayWallet = `${shortWallet.slice(0, 3)}...${shortWallet.slice(-3)}`;
+    
     connectBtn.style.display = "none";
     disconnectBtn.style.display = "inline-block";
+    document.getElementById("pay").style.display = "inline-block";
+    
     await checkTokenBalance();
   }
 }
@@ -915,9 +1513,7 @@ async function handleMobileRedirect() {
 // -----------------
 // Detectar si viene de móvil Phantom
 // -----------------
-window.addEventListener("DOMContentLoaded", () => {
-  handleMobileRedirect();
-});
+// Ya no necesitamos este addEventListener duplicado, se maneja en el DOMContentLoaded principal
 
     // --------------------------
     //  Desconectar
@@ -1239,11 +1835,8 @@ function bloquearComic() {
   });
 }
 
+// Este DOMContentLoaded ya no es necesario, se maneja en el principal arriba
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  desactivarClickComic();
-});
 
  
  

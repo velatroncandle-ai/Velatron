@@ -298,38 +298,25 @@
 
         <div class="form-group">
           <label for="season">Temporada *</label>
-          <input 
-            type="text" 
-            id="season" 
-            name="season" 
-            placeholder="Ej: temporada1, temporada2, etc." 
-            required
-            pattern="[a-zA-Z0-9_-]+"
-          >
-          <p class="help-text">Solo letras, números, guiones y guiones bajos (sin espacios)</p>
-        </div>
-
-        <div class="form-group">
-          <label for="imageExtension">Extensión de Imágenes *</label>
-          <select id="imageExtension" name="imageExtension" required>
-            <option value="jpg">JPG / JPEG</option>
-            <option value="png">PNG</option>
-            <option value="webp">WEBP</option>
-            <option value="gif">GIF</option>
+          <select id="season" name="season" required>
+            <option value="">Selecciona una temporada</option>
+            <option value="temporada1">Temporada 1</option>
+            <option value="temporada2">Temporada 2</option>
+            <option value="temporada3">Temporada 3</option>
+            <option value="temporada4">Temporada 4</option>
+            <option value="temporada5">Temporada 5</option>
+            <option value="temporada6">Temporada 6</option>
+            <option value="temporada7">Temporada 7</option>
           </select>
-          <p class="help-text">Formato de las imágenes dentro del ZIP</p>
+          <p class="help-text">Selecciona la temporada del cómic (máximo 7)</p>
         </div>
 
         <div class="form-group">
-          <label for="imagePrefix">Prefijo de Imágenes</label>
-          <input 
-            type="text" 
-            id="imagePrefix" 
-            name="imagePrefix" 
-            placeholder="pagina" 
-            value="pagina"
-          >
-          <p class="help-text">Ej: "pagina" generará pagina1.jpg, pagina2.jpg...</p>
+          <label for="imageExtension">Formato de Imágenes</label>
+          <select id="imageExtension" name="imageExtension" required disabled>
+            <option value="avif" selected>AVIF (Automático)</option>
+          </select>
+          <p class="help-text">Las imágenes se convertirán automáticamente a formato AVIF</p>
         </div>
 
         <div class="form-group">
@@ -339,7 +326,7 @@
               type="file" 
               id="coverImage" 
               name="coverImage" 
-              accept="image/*"
+              accept="image/avif"
               required
             >
             <label for="coverImage" class="file-label">
@@ -372,7 +359,10 @@
             <div id="zipFileName" class="file-name" style="display: none;"></div>
           </div>
           <p class="help-text">
-            ZIP conteniendo las imágenes numeradas: pagina1.jpg, pagina2.jpg, etc.
+            ⚠️ Máximo 22 imágenes. Deben estar numeradas: 1.avif, 2.avif, 3.avif... hasta 22.avif (o menos)
+          </p>
+          <p class="help-text" style="color: #ff6b6b; margin-top: 5px;">
+            ⚠️ SOLO formato .avif - No se aceptan otros formatos
           </p>
         </div>
 
@@ -446,8 +436,8 @@
       submitBtn.disabled = true;
       
       try {
-        // Enviar al servidor PHP
-        const response = await fetch('upload.php', {
+        // Enviar al servidor Python Flask
+        const response = await fetch('http://localhost:5000/upload', {
           method: 'POST',
           body: formData
         });
@@ -491,10 +481,6 @@
       }
     });
 
-    // Normalizar nombre de temporada en tiempo real
-    document.getElementById('season').addEventListener('input', function(e) {
-      this.value = this.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
-    });
   </script>
 </body>
 </html>
