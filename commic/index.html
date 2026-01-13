@@ -746,11 +746,12 @@
 <body>
   <header>
     
-       <a href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px;">⚙️ Admin</a>
+     
+  <a id="admin"  href="admin.html" style="position: absolute; right: 20px; top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #1a3a2a 0%, #0f2520 100%); border: 2px solid #00ff88; border-radius: 8px; color: #00ff88; text-decoration: none; font-weight: 600; transition: all 0.3s ease; font-size: 14px">⚙️ Admin</a>
   
- 
     <div class="wallet-controls">
-      <button id="pay" onclick="payComic()" style="display:none;">Contribute</button>
+       
+      <button id="pay" onclick="contributeToVelatron()" style="display:none;">Contribute to Velatron</button>
       <button id="connectBtn">Conectar Phantom</button>
       <button id="disconnectBtn">Desconectar</button>
       
@@ -887,7 +888,9 @@
           cover: comic.cover,
           folder: comic.folder,
           season: comic.season,
-          count: comic.count
+          count: comic.count,
+          wallet_address: comic.wallet_address,
+          comic_name: comic.comic_name
         };
       });
       
@@ -978,6 +981,7 @@
 
     let currentComic = [];
     let currentComicId = '';
+    let currentComicWallet = null; // Dirección de billetera del creador del cómic actual
     let pageIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
@@ -986,6 +990,17 @@
     function openComic(temporada = 'temporada1') {
       currentComic = comics[temporada] || comics.temporada1;
       currentComicId = temporada;
+      
+      // Obtener la dirección de billetera del creador de este cómic
+      const metadata = comicsMetadata[temporada];
+      currentComicWallet = metadata?.wallet_address || null;
+      
+      if (!currentComicWallet) {
+        console.warn('⚠️ Este cómic no tiene dirección de billetera configurada');
+      } else {
+        console.log('✅ Billetera del creador:', currentComicWallet);
+      }
+      
       switchPage('reader');
       loadPage(0);
       initTouchControls();
@@ -1087,35 +1102,8 @@
 
     // Cargar stats de todos los cómics para mostrar en miniaturas
     function loadAllComicsStats() {
-      const comicIds = ['temporada1', 'temporada2', 'temporada3', 'temporada4'];
-      
-      comicIds.forEach(comicId => {
-        const savedData = localStorage.getItem(`comicInteractions_${comicId}`);
-        let likes = 0;
-        let rating = 0;
-        
-        if (savedData) {
-          const data = JSON.parse(savedData);
-          likes = data.likes || 0;
-          const totalRatings = data.totalRatings || 0;
-          const sumRatings = data.sumRatings || 0;
-          rating = totalRatings > 0 ? Math.round(sumRatings / totalRatings) : 0;
-        }
-        
-        // Actualizar UI
-        const likesElement = document.getElementById(`likes-${comicId}`);
-        const ratingElement = document.getElementById(`rating-${comicId}`);
-        
-        if (likesElement) likesElement.textContent = likes;
-        if (ratingElement) ratingElement.textContent = rating;
-      });
-    }
-
-    // Cargar stats de todos los cómics para mostrar en miniaturas
-    function loadAllComicsStats() {
-      const comicIds = ['temporada1', 'temporada2', 'temporada3', 'temporada4'];
-      
-      comicIds.forEach(comicId => {
+      // Usar los IDs de los cómics cargados dinámicamente
+      Object.keys(comics).forEach(comicId => {
         const savedData = localStorage.getItem(`comicInteractions_${comicId}`);
         let likes = 0;
         let rating = 0;
@@ -1180,6 +1168,7 @@
             connectBtn.style.display = "none";
             disconnectBtn.style.display = "inline-block";
             document.getElementById("pay").style.display = "inline-block";
+             document.getElementById("admin").style.display = "inline-block";
             await checkTokenBalance();
             console.log('✅ Auto-conectado a Phantom');
           }
@@ -1322,7 +1311,7 @@
       });
     }
 
-    // Abrir modal de donación (integrado con el sistema existente)
+    // Abrir modal de donación al creador del cómic
     function openDonateModal() {
       if (!walletPublicKey) {
         Swal.fire({
@@ -1341,8 +1330,24 @@
         });
         return;
       }
-      // Llamar a la función de pago existente
-      payComic();
+      
+      // Verificar que hay una billetera del creador configurada
+      if (!currentComicWallet) {
+        Swal.fire({
+          title: 'Sin billetera configurada',
+          text: 'Este cómic no tiene una dirección de billetera para recibir donaciones',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          backdrop: 'rgba(0, 0, 0, 0.8)',
+          background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+          color: '#e0e0e0',
+          confirmButtonColor: '#00ff88'
+        });
+        return;
+      }
+      
+      // Llamar a la función de donación al creador
+      donateToCreator();
       
       // Registrar que el usuario donó para este cómic
       const donationData = localStorage.getItem(`comicDonations_${currentComicId}`);
@@ -1624,7 +1629,8 @@ const hasToken = amount > 0;
     disconnectBtn.addEventListener("click", disconnectPhantom);
 
 
-async function payComic(){
+// Función para contribuir a Velatron (marketing, token burning)
+async function contributeToVelatron(){
 
   try {
     // Obtener precio de SOL en USD
@@ -1733,7 +1739,9 @@ async function payComic(){
 
     if (!confirmResult.isConfirmed) return;
 
+    // Contribución a Velatron (marketing y token burning)
     const destino = new PublicKey(MERCHANT_WALLET);
+    console.log('✅ Contribuyendo a Velatron:', MERCHANT_WALLET);
 
     const tx = new Transaction().add(
       SystemProgram.transfer({
@@ -1759,6 +1767,166 @@ async function payComic(){
   } catch (e) {
     console.error(e);
     showAlert('info', 'Transaction Cancelled', 'The transaction was cancelled or failed');
+  }
+}
+
+// Función para donar al creador del cómic específico
+async function donateToCreator() {
+  try {
+    // Obtener precio de SOL en USD
+    let solPriceUSD = 0;
+    try {
+      const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+      const priceData = await priceResponse.json();
+      solPriceUSD = priceData.solana.usd;
+    } catch (e) {
+      console.error('Error al obtener precio de SOL:', e);
+      solPriceUSD = 0;
+    }
+
+    // Solicitar al usuario cuánto SOL quiere donar
+    const { value: inputAmount } = await Swal.fire({
+      title: 'Donar al Creador',
+      html: `
+        <p style="margin-bottom:15px;">¿Cuánto SOL quieres donar al creador de este cómic?</p>
+        ${solPriceUSD > 0 ? `<p style="font-size:12px;color:#888;margin-bottom:10px;">1 SOL ≈ $${solPriceUSD.toFixed(2)} USD</p>` : ''}
+        <div id="usdConversion" style="color:#00ff88;font-size:14px;margin-top:10px;min-height:20px;"></div>
+      `,
+      input: 'number',
+      inputValue: 0.01,
+      inputAttributes: {
+        min: '0.001',
+        step: '0.001',
+        placeholder: 'Cantidad en SOL',
+        id: 'solInput'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Continuar',
+      cancelButtonText: 'Cancelar',
+      backdrop: 'rgba(0, 0, 0, 0.8)',
+      background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+      color: '#e0e0e0',
+      confirmButtonColor: '#00ff88',
+      didOpen: () => {
+        const input = document.getElementById('solInput');
+        const usdDiv = document.getElementById('usdConversion');
+        
+        const updateUSD = () => {
+          const solAmount = parseFloat(input.value) || 0;
+          if (solPriceUSD > 0 && solAmount > 0) {
+            const usdAmount = (solAmount * solPriceUSD).toFixed(2);
+            usdDiv.innerHTML = `≈ $${usdAmount} USD`;
+          } else {
+            usdDiv.innerHTML = '';
+          }
+        };
+        
+        updateUSD();
+        input.addEventListener('input', updateUSD);
+      },
+      customClass: {
+        popup: 'swal-velatron-popup',
+        title: 'swal-velatron-title',
+        confirmButton: 'swal-velatron-button'
+      },
+      inputValidator: (value) => {
+        if (!value || parseFloat(value) <= 0) {
+          return 'Por favor ingresa una cantidad válida';
+        }
+        if (parseFloat(value) < 0.001) {
+          return 'La cantidad mínima es 0.001 SOL';
+        }
+      }
+    });
+
+    if (!inputAmount) return;
+
+    const montoSOL = parseFloat(inputAmount);
+    const lamports = Math.floor(montoSOL * LAMPORTS_PER_SOL);
+    const usdAmount = solPriceUSD > 0 ? (montoSOL * solPriceUSD).toFixed(2) : null;
+
+    const balance = await connection.getBalance(walletPublicKey);
+    const feeEstimate = 5000;
+
+    if (balance < lamports + feeEstimate) {
+      showAlert('error', 'Saldo Insuficiente', `Necesitas al menos ${(montoSOL + feeEstimate/LAMPORTS_PER_SOL).toFixed(4)} SOL (incluyendo comisiones)`);
+      return;
+    }
+
+    // Confirmar transacción
+    const confirmResult = await Swal.fire({
+      title: 'Confirmar Donación',
+      html: `
+        <p>Vas a donar al creador:</p>
+        <p><strong style="color:#00ff88;font-size:24px;">${montoSOL} SOL</strong></p>
+        ${usdAmount ? `<p style="color:#888;font-size:16px;">≈ $${usdAmount} USD</p>` : ''}
+        <p style="font-size:12px;margin-top:10px;color:#888;">Más comisión de red (~0.000005 SOL)</p>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Enviar',
+      cancelButtonText: 'Cancelar',
+      backdrop: 'rgba(0, 0, 0, 0.8)',
+      background: 'linear-gradient(135deg, #1a2a3a 0%, #0f1f2f 100%)',
+      color: '#e0e0e0',
+      confirmButtonColor: '#00ff88',
+      customClass: {
+        popup: 'swal-velatron-popup',
+        title: 'swal-velatron-title',
+        confirmButton: 'swal-velatron-button'
+      }
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
+    // Calcular el 1% para Velatron y 99% para el creador
+    const velatronFee = Math.floor(lamports * 0.01); // 1% para Velatron
+    const creatorAmount = lamports - velatronFee; // 99% para el creador
+
+    console.log('💰 Distribución de donación:');
+    console.log(`  - 99% al creador (${currentComicWallet}):`, creatorAmount, 'lamports');
+    console.log(`  - 1% a Velatron (${MERCHANT_WALLET}):`, velatronFee, 'lamports');
+
+    // Crear transacción con dos transferencias
+    const destinoCreador = new PublicKey(currentComicWallet);
+    const destinoVelatron = new PublicKey(MERCHANT_WALLET);
+
+    const tx = new Transaction()
+      .add(
+        // 99% al creador
+        SystemProgram.transfer({
+          fromPubkey: walletPublicKey,
+          toPubkey: destinoCreador,
+          lamports: creatorAmount
+        })
+      )
+      .add(
+        // 1% a Velatron
+        SystemProgram.transfer({
+          fromPubkey: walletPublicKey,
+          toPubkey: destinoVelatron,
+          lamports: velatronFee
+        })
+      );
+
+    tx.feePayer = walletPublicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    const signedTx = await window.solana.signTransaction(tx);
+    const sig = await connection.sendRawTransaction(signedTx.serialize());
+
+    const creatorSOL = (creatorAmount / LAMPORTS_PER_SOL).toFixed(4);
+    const velatronSOL = (velatronFee / LAMPORTS_PER_SOL).toFixed(6);
+    
+    const successMsg = usdAmount 
+      ? `¡Gracias por donar ${montoSOL} SOL!\n${creatorSOL} SOL al creador + ${velatronSOL} SOL a Velatron (1%)`
+      : `¡Gracias por donar ${montoSOL} SOL!\n${creatorSOL} SOL al creador + ${velatronSOL} SOL a Velatron (1%)`;
+    
+    showAlert('success', '¡Donación Enviada!', successMsg);
+
+  } catch (e) {
+    console.error(e);
+    showAlert('info', 'Transacción Cancelada', 'La transacción fue cancelada o falló');
   }
 }
 

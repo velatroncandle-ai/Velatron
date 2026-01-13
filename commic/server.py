@@ -20,12 +20,14 @@ import time
 import gc  # Para forzar liberación de recursos
 import tempfile  # Para archivos temporales del sistema
 from io import BytesIO  # Para trabajar con archivos en memoria
+import json  # Para guardar metadata de los cómics
 
 app = Flask(__name__)
 CORS(app)  # Permitir CORS para desarrollo
 
 # Configuración
 UPLOAD_FOLDER = 'comics'
+METADATA_FOLDER = 'metadata_secure'  # Carpeta segura fuera del acceso público
 MAX_IMAGES = 22
 ALLOWED_EXTENSIONS = {'avif'}
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB por archivo ZIP
@@ -35,8 +37,17 @@ TEMPORADAS_PERMITIDAS = ['temporada1', 'temporada2', 'temporada3', 'temporada4',
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
-# Crear carpeta base si no existe
+# Crear carpetas base si no existen
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(METADATA_FOLDER, exist_ok=True)
+
+# Middleware para bloquear acceso directo a archivos metadata.json
+@app.before_request
+def block_metadata_access():
+    from flask import abort, request as flask_request
+    # Bloquear acceso directo a cualquier archivo metadata.json
+    if 'metadata.json' in flask_request.path.lower():
+        abort(403)  # Forbidden
 
 
 def allowed_file(filename):
@@ -91,9 +102,13 @@ def upload_comic():
         if 'zipFile' not in request.files:
             return jsonify({'success': False, 'message': 'Falta el archivo ZIP'}), 400
         
+        if 'walletAddress' not in request.form:
+            return jsonify({'success': False, 'message': 'Falta la dirección de billetera Solana'}), 400
+        
         # Obtener datos del formulario
         comic_name = request.form['comicName'].strip()
         season = request.form['season'].strip().lower()
+        wallet_address = request.form['walletAddress'].strip()
         
         # Validar temporada
         if season not in TEMPORADAS_PERMITIDAS:
@@ -247,6 +262,24 @@ def upload_comic():
                 shutil.rmtree(target_folder)
                 return jsonify({'success': False, 'message': 'No se pudo procesar ninguna imagen'}), 500
             
+            # Guardar metadata del cómic en carpeta segura (NO en comics/)
+            # Usar comic_folder-season como identificador único
+            metadata_filename = f"{comic_folder}_{season}.json"
+            metadata_path = os.path.join(METADATA_FOLDER, metadata_filename)
+            
+            metadata = {
+                'comic_name': comic_name,
+                'wallet_address': wallet_address,
+                'season': season,
+                'folder': comic_folder,
+                'images_count': processed_count,
+                'upload_date': time.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            print(f"✅ Metadata guardada de forma segura: {metadata_path}")
+            
             # Retornar éxito
             return jsonify({
                 'success': True,
@@ -256,10 +289,11 @@ def upload_comic():
                     'folder': comic_folder,
                     'season': season,
                     'path': target_folder,
-                    'images_count': processed_count
+                    'images_count': processed_count,
+                    'wallet_address': wallet_address
                 }
             }), 200
-                
+
         except zipfile.BadZipFile:
             if 'zip_bytes' in locals():
                 zip_bytes.close()
@@ -314,12 +348,29 @@ def list_comics():
                         # Ejemplo: jhon-temporada1, keiner-temporada1, etc.
                         comic_key = f'{comic_folder}-{season}'
                         
+                        # Cargar metadata desde carpeta segura
+                        metadata_filename = f"{comic_folder}_{season}.json"
+                        metadata_path = os.path.join(METADATA_FOLDER, metadata_filename)
+                        wallet_address = None
+                        comic_name = comic_folder
+                        
+                        if os.path.exists(metadata_path):
+                            try:
+                                with open(metadata_path, 'r', encoding='utf-8') as f:
+                                    metadata = json.load(f)
+                                    wallet_address = metadata.get('wallet_address')
+                                    comic_name = metadata.get('comic_name', comic_folder)
+                            except Exception as e:
+                                print(f"⚠️ Error leyendo metadata de {comic_key}: {e}")
+                        
                         comics_data[comic_key] = {
                             'images': image_paths,
                             'cover': f'comics/{comic_folder}/{season}/principal.avif',
                             'folder': comic_folder,
                             'season': season,
-                            'count': len(image_paths)
+                            'count': len(image_paths),
+                            'wallet_address': wallet_address,
+                            'comic_name': comic_name
                         }
         
         return jsonify({'success': True, 'comics': comics_data}), 200

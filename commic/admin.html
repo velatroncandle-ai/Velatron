@@ -312,6 +312,19 @@
         </div>
 
         <div class="form-group">
+          <label for="walletAddress">Dirección de Billetera Solana *</label>
+          <input 
+            type="text" 
+            id="walletAddress" 
+            name="walletAddress" 
+            placeholder="Ej: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU" 
+            pattern="[1-9A-HJ-NP-Za-km-z]{32,44}"
+            required
+          >
+          <p class="help-text">Dirección de tu billetera Solana donde recibirás las donaciones de este cómic</p>
+        </div>
+
+        <div class="form-group">
           <label for="imageExtension">Formato de Imágenes</label>
           <select id="imageExtension" name="imageExtension" required disabled>
             <option value="avif" selected>AVIF (Automático)</option>
@@ -407,6 +420,7 @@
       // Obtener datos del formulario
       const comicName = document.getElementById('comicName').value.trim();
       const season = document.getElementById('season').value.trim();
+      const walletAddress = document.getElementById('walletAddress').value.trim();
       const coverFile = document.getElementById('coverImage').files[0];
       const zipFile = document.getElementById('zipFile').files[0];
       
@@ -423,6 +437,7 @@
       // Preparar FormData
       formData.append('comicName', comicName);
       formData.append('season', season);
+      formData.append('walletAddress', walletAddress);
       formData.append('comicFolder', comicFolder);
       formData.append('folderPath', folderPath);
       formData.append('coverImage', coverFile);

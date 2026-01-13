@@ -9,6 +9,7 @@ import os
 import json
 
 UPLOAD_FOLDER = 'comics'
+METADATA_FOLDER = 'metadata_secure'  # Carpeta segura de metadata
 
 def generate_comics_json():
     """Genera archivo comics.json con la estructura de cómics"""
@@ -54,15 +55,33 @@ def generate_comics_json():
                     # Key del cómic
                     comic_key = f'{comic_folder}-{season}'
                     
+                    # Cargar metadata desde carpeta segura
+                    metadata_filename = f"{comic_folder}_{season}.json"
+                    metadata_path = os.path.join(METADATA_FOLDER, metadata_filename)
+                    wallet_address = None
+                    comic_name = comic_folder
+                    
+                    if os.path.exists(metadata_path):
+                        try:
+                            with open(metadata_path, 'r', encoding='utf-8') as f:
+                                metadata = json.load(f)
+                                wallet_address = metadata.get('wallet_address')
+                                comic_name = metadata.get('comic_name', comic_folder)
+                        except Exception as e:
+                            print(f"  ⚠️ Error leyendo metadata de {comic_key}: {e}")
+                    
                     comics_data[comic_key] = {
                         'images': image_paths,
                         'cover': f'comics/{comic_folder}/{season}/principal.avif',
                         'folder': comic_folder,
                         'season': season,
-                        'count': len(image_paths)
+                        'count': len(image_paths),
+                        'wallet_address': wallet_address,
+                        'comic_name': comic_name
                     }
                     
-                    print(f"  ✅ {comic_key}: {len(image_paths)} imágenes")
+                    wallet_info = f" (Wallet: {wallet_address[:8]}...)" if wallet_address else " (Sin wallet)"
+                    print(f"  ✅ {comic_key}: {len(image_paths)} imágenes{wallet_info}")
     
     # Guardar JSON
     output_file = 'comics.json'
